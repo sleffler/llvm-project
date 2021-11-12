@@ -13,6 +13,10 @@
 # RUN: ld.lld --no-relax %t.o -o %t2
 # RUN: llvm-objdump --no-print-imm-hex -d %t2 | FileCheck --check-prefix=NORELAX %s
 
+## --no-relax disables GOT optimization.
+# RUN: ld.lld --no-relax %t.o -o %t2
+# RUN: llvm-objdump -d %t2 | FileCheck --check-prefix=NORELAX %s
+
 ## There is one R_X86_64_IRELATIVE relocations.
 # RELOC-LABEL: Relocations [
 # RELOC-NEXT:    Section (1) .rela.dyn {

@@ -773,6 +773,7 @@ def: FF<"no-add-needed">;
 def: F<"no-copy-dt-needed-entries">;
 def: F<"no-ctors-in-init-array">;
 def: F<"no-keep-memory">;
+def: F<"no-pipeline-knowledge">;
 def: F<"no-warn-mismatch">;
 def: Separate<["--", "-"], "rpath-link">;
 def: J<"rpath-link=">;
