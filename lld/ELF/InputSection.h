@@ -235,10 +235,6 @@ public:
     size_t compressedSize;
   };
 
-  // Auxiliary information for RISC-V linker relaxation. RISC-V does not use
-  // jumpInstrMod.
-  RISCVRelaxAux *relaxAux;
-
   // A function compiled with -fsplit-stack calling a function
   // compiled without -fsplit-stack needs its prologue adjusted. Find
   // such functions and adjust their prologues.  This is very similar

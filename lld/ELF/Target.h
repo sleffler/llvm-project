@@ -97,9 +97,6 @@ public:
   // Do a linker relaxation pass and return true if we changed something.
   virtual bool relaxOnce(int pass) const { return false; }
 
-  // Do a linker relaxation pass and return true if we changed something.
-  virtual bool relaxOnce(int pass) const { return false; }
-
   virtual void applyJumpInstrMod(uint8_t *loc, JumpModType type,
                                  JumpModType val) const {}
 
