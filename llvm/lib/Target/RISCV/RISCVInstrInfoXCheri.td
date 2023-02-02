@@ -2266,10 +2266,11 @@ def : CompressPat<(CSD GPR:$rs2, CSP:$rs1, uimm9_lsb000:$imm),
 
 
 // TODO(sleffler): was IsRV32E but not a defined feature
-let Predicates = [HasCheri, IsRV32, IsCapMode, IsRVE] in {
-let mayLoad = true, mayStore = false, hasSideEffects = false in
-def PseudoCLLW : Pseudo<(outs GPR:$dst), (ins bare_symbol:$src), [],
-                        "cllc", "$dst, $src">;
-def : Pat<(load (load globaladdr:$src)),
-          (PseudoCLLW bare_symbol:$src)>;
-}
+// XXX temporarily comments out
+//let Predicates = [HasCheri, IsRV32, IsCapMode, IsRVE] in {
+//let mayLoad = true, mayStore = false, hasSideEffects = false in
+//def PseudoCLLW : Pseudo<(outs GPCR:$dst), (ins bare_symbol:$src), [],
+//                        "cllc", "$dst, $src">;
+//def : Pat<(load (load globaladdr:$src)),
+//          (PseudoCLLW bare_symbol:$src)>;
+//}
