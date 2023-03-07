@@ -6499,6 +6499,7 @@ RValue CodeGenFunction::EmitCall(QualType CalleeType, const CGCallee &OrigCallee
     FnType = getContext().getFunctionType(FnPType->getReturnType(),
         NewParams, EPI)->getAs<FunctionType>();
   } else if (FnType->getCallConv() == CC_CHERICCall &&
+             TargetDecl &&
              TargetDecl->hasAttr<CHERIMethodClassAttr>()) {
     assert(TargetDecl);
     StringRef Suffix = TargetDecl->hasAttr<CHERIMethodSuffixAttr>() ?
