@@ -13749,6 +13749,7 @@ std::vector<std::string> ASTContext::filterFunctionTargetVersionAttrs(
   TV->getFeatures(Feats);
   for (auto &Feature : Feats)
     if (Target->validateCpuSupports(Feature.str()))
+      // Use '?' to mark features that came from TargetVersion.
       ResFeats.push_back("?" + Feature.str());
   return ResFeats;
 }
@@ -13818,6 +13819,7 @@ void ASTContext::getFunctionFeatureMap(llvm::StringMap<bool> &FeatureMap,
         VersionStr.split(VersionFeatures, "+");
         for (auto &VFeature : VersionFeatures) {
           VFeature = VFeature.trim();
+          // Use '?' to mark features that came from AArch64 TargetClones.
           Features.push_back((StringRef{"?"} + VFeature).str());
         }
       }
