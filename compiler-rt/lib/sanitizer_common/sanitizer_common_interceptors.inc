@@ -26,9 +26,6 @@
 //   COMMON_INTERCEPTOR_SET_PTHREAD_NAME
 //   COMMON_INTERCEPTOR_HANDLE_RECVMSG
 //   COMMON_INTERCEPTOR_NOTHING_IS_INITIALIZED
-//   COMMON_INTERCEPTOR_MEMSET_IMPL
-//   COMMON_INTERCEPTOR_MEMMOVE_IMPL
-//   COMMON_INTERCEPTOR_MEMCPY_IMPL
 //   COMMON_INTERCEPTOR_MMAP_IMPL
 //   COMMON_INTERCEPTOR_COPY_STRING
 //   COMMON_INTERCEPTOR_STRNDUP_IMPL
@@ -198,15 +195,6 @@ extern const short *_tolower_tab_;
 #define wait4 __wait4_time64
 #endif
 
-// Platform-specific options.
-#if SANITIZER_APPLE
-#define PLATFORM_HAS_DIFFERENT_MEMCPY_AND_MEMMOVE 0
-#elif SANITIZER_WINDOWS64
-#define PLATFORM_HAS_DIFFERENT_MEMCPY_AND_MEMMOVE 0
-#else
-#define PLATFORM_HAS_DIFFERENT_MEMCPY_AND_MEMMOVE 1
-#endif  // SANITIZER_APPLE
-
 #ifndef COMMON_INTERCEPTOR_INITIALIZE_RANGE
 #define COMMON_INTERCEPTOR_INITIALIZE_RANGE(p, size) {}
 #endif
@@ -300,47 +288,6 @@ extern const short *_tolower_tab_;
 #else
 #define COMMON_INTERCEPT_FUNCTION_GLIBC_VER_MIN(fn, ver) \
   COMMON_INTERCEPT_FUNCTION(fn)
-#endif
-
-#ifndef COMMON_INTERCEPTOR_MEMSET_IMPL
-#define COMMON_INTERCEPTOR_MEMSET_IMPL(ctx, dst, v, size) \
-  {                                                       \
-    if (COMMON_INTERCEPTOR_NOTHING_IS_INITIALIZED)        \
-      return internal_memset(dst, v, size);               \
-    COMMON_INTERCEPTOR_ENTER(ctx, memset, dst, v, size);  \
-    if (common_flags()->intercept_intrin)                 \
-      COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst, size);     \
-    return REAL(memset)(dst, v, size);                    \
-  }
-#endif
-
-#ifndef COMMON_INTERCEPTOR_MEMMOVE_IMPL
-#define COMMON_INTERCEPTOR_MEMMOVE_IMPL(ctx, dst, src, size) \
-  {                                                          \
-    if (COMMON_INTERCEPTOR_NOTHING_IS_INITIALIZED)           \
-      return internal_memmove(dst, src, size);               \
-    COMMON_INTERCEPTOR_ENTER(ctx, memmove, dst, src, size);  \
-    if (common_flags()->intercept_intrin) {                  \
-      COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst, size);        \
-      COMMON_INTERCEPTOR_READ_RANGE(ctx, src, size);         \
-    }                                                        \
-    return REAL(memmove)(dst, src, size);                    \
-  }
-#endif
-
-#ifndef COMMON_INTERCEPTOR_MEMCPY_IMPL
-#define COMMON_INTERCEPTOR_MEMCPY_IMPL(ctx, dst, src, size) \
-  {                                                         \
-    if (COMMON_INTERCEPTOR_NOTHING_IS_INITIALIZED) {        \
-      return internal_memmove(dst, src, size);              \
-    }                                                       \
-    COMMON_INTERCEPTOR_ENTER(ctx, memcpy, dst, src, size);  \
-    if (common_flags()->intercept_intrin) {                 \
-      COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst, size);       \
-      COMMON_INTERCEPTOR_READ_RANGE(ctx, src, size);        \
-    }                                                       \
-    return REAL(memcpy)(dst, src, size);                    \
-  }
 #endif
 
 #ifndef COMMON_INTERCEPTOR_MMAP_IMPL
@@ -839,57 +786,6 @@ INTERCEPTOR(char *, strpbrk, const char *s1, const char *s2) {
 #define INIT_STRPBRK COMMON_INTERCEPT_FUNCTION(strpbrk);
 #else
 #define INIT_STRPBRK
-#endif
-
-#if SANITIZER_INTERCEPT_MEMSET
-INTERCEPTOR(void *, memset, void *dst, int v, usize size) {
-  void *ctx;
-  COMMON_INTERCEPTOR_MEMSET_IMPL(ctx, dst, v, size);
-}
-
-#define INIT_MEMSET COMMON_INTERCEPT_FUNCTION(memset)
-#else
-#define INIT_MEMSET
-#endif
-
-#if SANITIZER_INTERCEPT_MEMMOVE
-INTERCEPTOR(void *, memmove, void *dst, const void *src, usize size) {
-  void *ctx;
-  COMMON_INTERCEPTOR_MEMMOVE_IMPL(ctx, dst, src, size);
-}
-
-#define INIT_MEMMOVE COMMON_INTERCEPT_FUNCTION(memmove)
-#else
-#define INIT_MEMMOVE
-#endif
-
-#if SANITIZER_INTERCEPT_MEMCPY
-INTERCEPTOR(void *, memcpy, void *dst, const void *src, usize size) {
-  // On OS X, calling internal_memcpy here will cause memory corruptions,
-  // because memcpy and memmove are actually aliases of the same
-  // implementation.  We need to use internal_memmove here.
-  // N.B.: If we switch this to internal_ we'll have to use internal_memmove
-  // due to memcpy being an alias of memmove on OS X.
-  void *ctx;
-#if PLATFORM_HAS_DIFFERENT_MEMCPY_AND_MEMMOVE
-    COMMON_INTERCEPTOR_MEMCPY_IMPL(ctx, dst, src, size);
-#else
-    COMMON_INTERCEPTOR_MEMMOVE_IMPL(ctx, dst, src, size);
-#endif
-}
-
-#define INIT_MEMCPY                                  \
-  do {                                               \
-    if (PLATFORM_HAS_DIFFERENT_MEMCPY_AND_MEMMOVE) { \
-      COMMON_INTERCEPT_FUNCTION(memcpy);             \
-    } else {                                         \
-      ASSIGN_REAL(memcpy, memmove);                  \
-    }                                                \
-    CHECK(REAL(memcpy));                             \
-  } while (false)
-
-#else
-#define INIT_MEMCPY
 #endif
 
 #if SANITIZER_INTERCEPT_MEMCMP
@@ -5791,6 +5687,7 @@ INTERCEPTOR(int, capset, void *hdrp, const void *datap) {
 #define INIT_CAPGET
 #endif
 
+<<<<<<< HEAD
 #if SANITIZER_INTERCEPT_AEABI_MEM
 INTERCEPTOR(void *, __aeabi_memmove, void *to, const void *from, usize size) {
   void *ctx;
@@ -5890,6 +5787,8 @@ INTERCEPTOR(void *, bzero, void *block, usize size) {
 #define INIT_BZERO
 #endif  // SANITIZER_INTERCEPT_BZERO
 
+=======
+>>>>>>> c551c9c311b33a847390f6a57afda3b82d517675
 #if SANITIZER_INTERCEPT_FTIME
 INTERCEPTOR(int, ftime, __sanitizer_timeb *tp) {
   void *ctx;
@@ -10362,11 +10261,17 @@ INTERCEPTOR(int, argp_parse, const struct argp *argp, int argc, char **argv,
 
 #include "sanitizer_common_interceptors_netbsd_compat.inc"
 
+namespace __sanitizer {
+void InitializeMemintrinsicInterceptors();
+}  // namespace __sanitizer
+
 static void InitializeCommonInterceptors() {
 #if SI_POSIX
   static u64 metadata_mem[sizeof(MetadataHashMap) / sizeof(u64) + 1];
   interceptor_metadata_map = new ((void *)&metadata_mem) MetadataHashMap();
 #endif
+
+  __sanitizer::InitializeMemintrinsicInterceptors();
 
   INIT_MMAP;
   INIT_MMAP64;
@@ -10389,9 +10294,6 @@ static void InitializeCommonInterceptors() {
   INIT_STRPBRK;
   INIT_STRXFRM;
   INIT___STRXFRM_L;
-  INIT_MEMSET;
-  INIT_MEMMOVE;
-  INIT_MEMCPY;
   INIT_MEMCHR;
   INIT_MEMCMP;
   INIT_BCMP;
@@ -10563,9 +10465,6 @@ static void InitializeCommonInterceptors() {
   INIT_GETIFADDRS;
   INIT_IF_INDEXTONAME;
   INIT_CAPGET;
-  INIT_AEABI_MEM;
-  INIT___BZERO;
-  INIT_BZERO;
   INIT_FTIME;
   INIT_XDR;
   INIT_XDRREC_LINUX;
