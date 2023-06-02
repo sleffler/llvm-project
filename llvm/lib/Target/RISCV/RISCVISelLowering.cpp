@@ -11416,6 +11416,10 @@ static SDValue performFP_TO_INTCombine(SDNode *N,
 
   SDValue Src = N->getOperand(0);
 
+  // Don't do this for strict-fp Src.
+  if (Src->isStrictFPOpcode() || Src->isTargetStrictFPOpcode())
+    return SDValue();
+
   // Ensure the FP type is legal.
   if (!TLI.isTypeLegal(Src.getValueType()))
     return SDValue();
@@ -11514,6 +11518,10 @@ static SDValue performFP_TO_INT_SATCombine(SDNode *N,
     return SDValue();
 
   SDValue Src = N->getOperand(0);
+
+  // Don't do this for strict-fp Src.
+  if (Src->isStrictFPOpcode() || Src->isTargetStrictFPOpcode())
+    return SDValue();
 
   // Ensure the FP type is also legal.
   if (!TLI.isTypeLegal(Src.getValueType()))
