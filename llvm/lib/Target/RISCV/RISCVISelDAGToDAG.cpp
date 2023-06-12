@@ -3241,7 +3241,6 @@ bool RISCVDAGToDAGISel::doPeepholeMaskedRVV(SDNode *N) {
   // have a tied destination.
 #ifndef NDEBUG
   const MCInstrDesc &MCID = TII.get(Opc);
-  uint64_t TSFlags = MCID.TSFlags;
   bool HasTiedDest = RISCVII::isFirstDefTiedToFirstUse(MCID);
   assert((UseTUPseudo == HasTiedDest) && "Unexpected pseudo to transform to");
 #endif
