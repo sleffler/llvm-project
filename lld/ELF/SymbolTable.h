@@ -19,11 +19,6 @@ namespace lld::elf {
 class InputFile;
 class SharedFile;
 
-struct ArmCmseEntryFunction {
-  Symbol *acleSeSym;
-  Symbol *sym;
-};
-
 // SymbolTable is a bucket of all known symbols, including defined,
 // undefined, or lazy symbols (the last one is symbols in archive
 // files whose archive members are not yet loaded).
@@ -78,10 +73,6 @@ public:
   // Map of symbols defined in the Arm CMSE import library. The linker must
   // preserve the addresses in the output objects.
   llvm::StringMap<Defined *> cmseImportLib;
-
-  // True if <sym> from the input Arm CMSE import library is written to the
-  // output Arm CMSE import library.
-  llvm::StringMap<bool> inCMSEOutImpLib;
 
 private:
   SmallVector<Symbol *, 0> findByVersion(SymbolVersion ver);
