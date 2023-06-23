@@ -1396,9 +1396,6 @@ unsigned RISCVInstrInfo::getInstSizeInBytes(const MachineInstr &MI) const {
     }
   }
 
-  if (Opcode == TargetOpcode::BUNDLE)
-    return getInstBundleLength(MI);
-
   if (MI.getParent() && MI.getParent()->getParent()) {
     if (isCompressibleInst(MI, STI))
       return 2;
@@ -1410,17 +1407,6 @@ unsigned RISCVInstrInfo::getInstSizeInBytes(const MachineInstr &MI) const {
       !IsRVVInitUndefOpcode(Opcode))
     report_fatal_error("Unexpected zero size for pseudo: " + getName(Opcode));
   return Result;
-}
-
-unsigned RISCVInstrInfo::getInstBundleLength(const MachineInstr &MI) const {
-  unsigned Size = 0;
-  MachineBasicBlock::const_instr_iterator I = MI.getIterator();
-  MachineBasicBlock::const_instr_iterator E = MI.getParent()->instr_end();
-  while (++I != E && I->isInsideBundle()) {
-    assert(!I->isBundle() && "No nested bundle!");
-    Size += getInstSizeInBytes(*I);
-  }
-  return Size;
 }
 
 bool RISCVInstrInfo::isAsCheapAsAMove(const MachineInstr &MI) const {
