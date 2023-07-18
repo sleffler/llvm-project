@@ -1033,8 +1033,6 @@ private:
                                   ArrayRef<Type *> OverloadedTypes,
                                   const Twine &Name = "");
 
-  Value *getCastedInt8PtrValue(Value *Ptr);
-
   //===--------------------------------------------------------------------===//
   // Instruction creation methods: Terminators
   //===--------------------------------------------------------------------===//
