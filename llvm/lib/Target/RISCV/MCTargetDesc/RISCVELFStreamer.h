@@ -18,8 +18,6 @@
 using namespace llvm;
 
 class RISCVELFStreamer : public MCELFStreamer {
-  static bool requiresFixups(MCContext &C, const MCExpr *Value,
-                             const MCExpr *&LHS, const MCExpr *&RHS);
   void reset() override;
 
 public:
@@ -33,8 +31,6 @@ public:
 protected:
   void EmitCheriCapabilityImpl(const MCSymbol *Symbol, const MCExpr *Addend,
                                unsigned CapSize, SMLoc Loc) override;
-
-  void emitValueImpl(const MCExpr *Value, unsigned Size, SMLoc Loc) override;
 };
 
 namespace llvm {
