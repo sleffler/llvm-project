@@ -11864,7 +11864,7 @@ QualType ASTContext::GetBuiltinType(unsigned Id,
   bool Variadic = (TypeStr[0] == '.');
 
   FunctionType::ExtInfo EI(getDefaultCallingConvention(
-      Variadic, /*IsCXXMethod=*/false, /*IsBuiltin=*/true));
+      Variadic, /*IsCXXMethod=*/false, /*IsBuiltin=*/true, /*IsLibcall*/ true));
   if (BuiltinInfo.isNoReturn(Id)) EI = EI.withNoReturn(true);
 
 
@@ -12227,7 +12227,8 @@ void ASTContext::forEachMultiversionedFunctionVersion(
 
 CallingConv ASTContext::getDefaultCallingConvention(bool IsVariadic,
                                                     bool IsCXXMethod,
-                                                    bool IsBuiltin) const {
+                                                    bool IsBuiltin,
+                                                    bool IsLibcall) const {
   // Pass through to the C++ ABI object
   if (IsCXXMethod)
     return ABI->getDefaultMethodCallConv(IsVariadic);
@@ -12260,6 +12261,8 @@ CallingConv ASTContext::getDefaultCallingConvention(bool IsVariadic,
       break;
     }
   }
+  if (IsLibcall)
+    return Target->getLibcallCallingConv();
   return Target->getDefaultCallingConv();
 }
 
