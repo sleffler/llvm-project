@@ -9,8 +9,7 @@ target triple = "mips64-unknown-freebsd12.0"
 %struct.b = type { i64 }
 
 @.str = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
-@c = local_unnamed_addr global %struct.b { i64 ptrtoint ([1 x i8]* @.str to i64) }, align 8
-
+@c = local_unnamed_addr global %struct.b { i64 ptrtoint (ptr @.str to i64) }, align 8
 
 
 

@@ -4,13 +4,11 @@ source_filename = "cmpcap.c"
 target datalayout = "E-m:e-pf200:128:128:128:64-i8:8:32-i16:16:32-i64:64-n32:64-S128"
 target triple = "cheri-unknown-freebsd"
 
-%struct.bigbuf = type { [5 x i8 addrspace(200)*] }
-
 ; Function Attrs: nounwind
-define void @zero(%struct.bigbuf addrspace(200)* nocapture %out) local_unnamed_addr #0 {
+define void @zero(ptr addrspace(200) nocapture %out) local_unnamed_addr #0 {
 entry:
-  %.compoundliteral.sroa.0.0..sroa_cast1 = bitcast %struct.bigbuf addrspace(200)* %out to i8 addrspace(200)*
-  call void @llvm.memset.p200i8.i64(i8 addrspace(200)* align 16 %.compoundliteral.sroa.0.0..sroa_cast1, i8 42, i64 20, i1 false)
+  %.compoundliteral.sroa.0.0..sroa_cast1 = bitcast ptr addrspace(200) %out to ptr addrspace(200)
+  call void @llvm.memset.p200.i64(ptr addrspace(200) align 16 %.compoundliteral.sroa.0.0..sroa_cast1, i8 42, i64 20, i1 false)
 ; Check that the non-zero memset is expanded to stores.
 ; CHECK: csw
 ; CHECK: csd
@@ -22,15 +20,15 @@ entry:
   ret void
 }
 
-; Function Attrs: argmemonly nounwind
-declare void @llvm.memset.p200i8.i64(i8 addrspace(200)* nocapture writeonly, i8, i64, i1) #1
+; Function Attrs: nocallback nofree nounwind willreturn memory(argmem: write)
+declare void @llvm.memset.p200.i64(ptr addrspace(200) nocapture writeonly, i8, i64, i1 immarg) #1
 
 attributes #0 = { nounwind }
-attributes #1 = { argmemonly nounwind }
+attributes #1 = { nocallback nofree nounwind willreturn memory(argmem: write) }
 
 !llvm.module.flags = !{!0, !1}
 !llvm.ident = !{!2}
 
 !0 = !{i32 1, !"wchar_size", i32 4}
-!1 = !{i32 7, !"PIC Level", i32 2}
+!1 = !{i32 8, !"PIC Level", i32 2}
 !2 = !{!"clang version 7.0.0 (ssh://dc552@vica.cl.cam.ac.uk:/home/dc552/CHERISDK/llvm/tools/clang f77d651cc0da68f4b1dfb357d7212fbadc5e1725) (ssh://dc552@vica.cl.cam.ac.uk:/home/dc552/CHERISDK/llvm 726657ee8ccc6ad3a8c0b2b189d9db24171c3f8f)"}

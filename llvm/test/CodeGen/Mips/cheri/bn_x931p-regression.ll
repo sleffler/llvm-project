@@ -5,14 +5,15 @@
 
 declare i32 @b() addrspace(200)
 
-; Calling a function with 9+ capability parameters would previously cause verification errors
-define i32 @a(i64 addrspace(200) *, i32 addrspace(200) *, i32 addrspace(200) *,
-              i64 addrspace(200) *, i64 addrspace(200) *, i64 addrspace(200) *,
-              i32 addrspace(200) *, i32 addrspace(200) *, i32 addrspace(200) *) addrspace(200) nounwind {
+define i32 @a(ptr addrspace(200) %0, ptr addrspace(200) %1, ptr addrspace(200) %2,
+              ptr addrspace(200) %3, ptr addrspace(200) %4, ptr addrspace(200) %5,
+              ptr addrspace(200) %6, ptr addrspace(200) %7, ptr addrspace(200) %8) addrspace(200) {
 ; PCREL-LABEL: a:
 ; PCREL:       # %bb.0:
 ; PCREL-NEXT:    cincoffset $c11, $c11, -[[#STACKFRAME_SIZE:]]
+; PCREL-NEXT:    .cfi_def_cfa_offset [[#STACKFRAME_SIZE]]
 ; PCREL-NEXT:    csc $c17, $zero, 0($c11)
+; PCREL-NEXT:    .cfi_offset 89, -[[#STACKFRAME_SIZE]]
 ; PCREL-NEXT:    lui $1, %pcrel_hi(_CHERI_CAPABILITY_TABLE_-8)
 ; PCREL-NEXT:    daddiu $1, $1, %pcrel_lo(_CHERI_CAPABILITY_TABLE_-4)
 ; PCREL-NEXT:    cgetpccincoffset $c1, $1

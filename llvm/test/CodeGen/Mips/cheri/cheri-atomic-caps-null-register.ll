@@ -3,15 +3,16 @@
 ; RUN: %cheri_purecap_llc -verify-machineinstrs -cheri-cap-table-abi=pcrel %s -o - -O2 | FileCheck %s -enable-var-scope
 ; ModuleID = 'atomic.c'
 
-@cap = common addrspace(200) global i32 addrspace(200)* null, align 32
+@cap = common addrspace(200) global ptr addrspace(200) null, align 32
 
-declare void @test(i32 addrspace(200)* nocapture %cap, i1 %bool)
+declare void @test(ptr addrspace(200) nocapture, i1)
 
-define i32 @cmpxchg_null_ptr(i32 addrspace(200)* nocapture %exp, i32 addrspace(200)* %newval) nounwind {
+; Function Attrs: nounwind
+define i32 @cmpxchg_null_ptr(ptr addrspace(200) nocapture %exp, ptr addrspace(200) %newval) #0 {
 ; CHECK-LABEL: cmpxchg_null_ptr:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    cincoffset $c11, $c11, -[[#STACKFRAME_SIZE:]]
-; CHECK-NEXT:    csc $c17, $zero, 0($c11)
+; CHECK-NEXT:    cincoffset $c11, $c11, -16
+; CHECK-NEXT:    csc $c17, $zero, 0($c11) # 16-byte Folded Spill
 ; CHECK-NEXT:    cgetnull $c2
 ; CHECK-NEXT:    sync
 ; CHECK-NEXT:  .LBB0_1: # %entry
@@ -35,23 +36,23 @@ define i32 @cmpxchg_null_ptr(i32 addrspace(200)* nocapture %exp, i32 addrspace(2
 ; CHECK-NEXT:    cjalr $c12, $c17
 ; CHECK-NEXT:    cmove $c3, $c1
 ; CHECK-NEXT:    addiu $2, $zero, 42
-; CHECK-NEXT:    clc $c17, $zero, 0($c11)
+; CHECK-NEXT:    clc $c17, $zero, 0($c11) # 16-byte Folded Reload
 ; CHECK-NEXT:    cjr $c17
-; CHECK-NEXT:    cincoffset $c11, $c11, [[#STACKFRAME_SIZE]]
-; Note: cannot use the null register for the pointer operand since in cllc/cscc it means $ddc:
+; CHECK-NEXT:    cincoffset $c11, $c11, 16
 entry:
-  %0 = cmpxchg i32 addrspace(200)* addrspace(200)* null, i32 addrspace(200)* %exp, i32 addrspace(200)* %newval seq_cst seq_cst
-  %1 = extractvalue { i32 addrspace(200)*, i1 } %0, 0
-  %2 = extractvalue { i32 addrspace(200)*, i1 } %0, 1
-  call void @test(i32 addrspace(200)* nocapture %1, i1 %2)
+  %0 = cmpxchg ptr addrspace(200) null, ptr addrspace(200) %exp, ptr addrspace(200) %newval seq_cst seq_cst
+  %1 = extractvalue { ptr addrspace(200), i1 } %0, 0
+  %2 = extractvalue { ptr addrspace(200), i1 } %0, 1
+  call void @test(ptr addrspace(200) nocapture %1, i1 %2)
   ret i32 42
 }
 
-define i32 @cmpxchg_null_exp(i32 addrspace(200)* %newval) nounwind {
+; Function Attrs: nounwind
+define i32 @cmpxchg_null_exp(ptr addrspace(200) %newval) #0 {
 ; CHECK-LABEL: cmpxchg_null_exp:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    cincoffset $c11, $c11, -[[#STACKFRAME_SIZE:]]
-; CHECK-NEXT:    csc $c17, $zero, 0($c11)
+; CHECK-NEXT:    cincoffset $c11, $c11, -16
+; CHECK-NEXT:    csc $c17, $zero, 0($c11) # 16-byte Folded Spill
 ; CHECK-NEXT:    lui $1, %pcrel_hi(_CHERI_CAPABILITY_TABLE_-8)
 ; CHECK-NEXT:    daddiu $1, $1, %pcrel_lo(_CHERI_CAPABILITY_TABLE_-4)
 ; CHECK-NEXT:    cgetpccincoffset $c2, $1
@@ -75,23 +76,23 @@ define i32 @cmpxchg_null_exp(i32 addrspace(200)* %newval) nounwind {
 ; CHECK-NEXT:    cjalr $c12, $c17
 ; CHECK-NEXT:    cmove $c3, $c1
 ; CHECK-NEXT:    addiu $2, $zero, 42
-; CHECK-NEXT:    clc $c17, $zero, 0($c11)
+; CHECK-NEXT:    clc $c17, $zero, 0($c11) # 16-byte Folded Reload
 ; CHECK-NEXT:    cjr $c17
-; CHECK-NEXT:    cincoffset $c11, $c11, [[#STACKFRAME_SIZE]]
-; This used to emit a cgetnull $c5
+; CHECK-NEXT:    cincoffset $c11, $c11, 16
 entry:
-  %0 = cmpxchg i32 addrspace(200)* addrspace(200)* @cap, i32 addrspace(200)* null, i32 addrspace(200)* %newval seq_cst seq_cst
-  %1 = extractvalue { i32 addrspace(200)*, i1 } %0, 0
-  %2 = extractvalue { i32 addrspace(200)*, i1 } %0, 1
-  call void @test(i32 addrspace(200)* nocapture %1, i1 %2)
+  %0 = cmpxchg ptr addrspace(200) @cap, ptr addrspace(200) null, ptr addrspace(200) %newval seq_cst seq_cst
+  %1 = extractvalue { ptr addrspace(200), i1 } %0, 0
+  %2 = extractvalue { ptr addrspace(200), i1 } %0, 1
+  call void @test(ptr addrspace(200) nocapture %1, i1 %2)
   ret i32 42
 }
 
-define i32 @cmpxchg_null_newval(i32 addrspace(200)* %exp) nounwind {
+; Function Attrs: nounwind
+define i32 @cmpxchg_null_newval(ptr addrspace(200) %exp) #0 {
 ; CHECK-LABEL: cmpxchg_null_newval:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    cincoffset $c11, $c11, -[[#STACKFRAME_SIZE:]]
-; CHECK-NEXT:    csc $c17, $zero, 0($c11)
+; CHECK-NEXT:    cincoffset $c11, $c11, -16
+; CHECK-NEXT:    csc $c17, $zero, 0($c11) # 16-byte Folded Spill
 ; CHECK-NEXT:    lui $1, %pcrel_hi(_CHERI_CAPABILITY_TABLE_-8)
 ; CHECK-NEXT:    daddiu $1, $1, %pcrel_lo(_CHERI_CAPABILITY_TABLE_-4)
 ; CHECK-NEXT:    cgetpccincoffset $c2, $1
@@ -115,21 +116,19 @@ define i32 @cmpxchg_null_newval(i32 addrspace(200)* %exp) nounwind {
 ; CHECK-NEXT:    cjalr $c12, $c17
 ; CHECK-NEXT:    cmove $c3, $c1
 ; CHECK-NEXT:    addiu $2, $zero, 42
-; CHECK-NEXT:    clc $c17, $zero, 0($c11)
+; CHECK-NEXT:    clc $c17, $zero, 0($c11) # 16-byte Folded Reload
 ; CHECK-NEXT:    cjr $c17
-; CHECK-NEXT:    cincoffset $c11, $c11, [[#STACKFRAME_SIZE]]
-; This used to emit a cgetnull $c5
+; CHECK-NEXT:    cincoffset $c11, $c11, 16
 entry:
-  %0 = cmpxchg i32 addrspace(200)* addrspace(200)* @cap, i32 addrspace(200)* %exp, i32 addrspace(200)* null seq_cst seq_cst
-  %1 = extractvalue { i32 addrspace(200)*, i1 } %0, 0
-  %2 = extractvalue { i32 addrspace(200)*, i1 } %0, 1
-  call void @test(i32 addrspace(200)* nocapture %1, i1 %2)
+  %0 = cmpxchg ptr addrspace(200) @cap, ptr addrspace(200) %exp, ptr addrspace(200) null seq_cst seq_cst
+  %1 = extractvalue { ptr addrspace(200), i1 } %0, 0
+  %2 = extractvalue { ptr addrspace(200), i1 } %0, 1
+  call void @test(ptr addrspace(200) nocapture %1, i1 %2)
   ret i32 42
 }
 
-
-define i32 addrspace(200)* @load_atomic_null_ptr() nounwind {
-; Cannot use NULL register as the operand here since zero encodes $ddc
+; Function Attrs: nounwind
+define ptr addrspace(200) @load_atomic_null_ptr() #0 {
 ; CHECK-LABEL: load_atomic_null_ptr:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    cgetnull $c1
@@ -137,11 +136,12 @@ define i32 addrspace(200)* @load_atomic_null_ptr() nounwind {
 ; CHECK-NEXT:    sync
 ; CHECK-NEXT:    cjr $c17
 ; CHECK-NEXT:    nop
-  %x = load atomic i32 addrspace(200)*, i32 addrspace(200)* addrspace(200)* null seq_cst, align 32
-  ret i32 addrspace(200)* %x
+  %x = load atomic ptr addrspace(200), ptr addrspace(200) null seq_cst, align 32
+  ret ptr addrspace(200) %x
 }
-define void @store_atomic_null_ptr(i32 addrspace(200)* %value) nounwind {
-; Cannot use NULL register as the operand here since zero encodes $ddc
+
+; Function Attrs: nounwind
+define void @store_atomic_null_ptr(ptr addrspace(200) %value) #0 {
 ; CHECK-LABEL: store_atomic_null_ptr:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    cgetnull $c1
@@ -150,11 +150,12 @@ define void @store_atomic_null_ptr(i32 addrspace(200)* %value) nounwind {
 ; CHECK-NEXT:    sync
 ; CHECK-NEXT:    cjr $c17
 ; CHECK-NEXT:    nop
-  store atomic i32 addrspace(200)* %value, i32 addrspace(200)* addrspace(200)* null seq_cst, align 32
+  store atomic ptr addrspace(200) %value, ptr addrspace(200) null seq_cst, align 32
   ret void
 }
-define void @store_atomic_null_value(i32 addrspace(200)* addrspace(200)* %ptr) nounwind {
-; This used to emit a cgetnull for the value.
+
+; Function Attrs: nounwind
+define void @store_atomic_null_value(ptr addrspace(200) %ptr) #0 {
 ; CHECK-LABEL: store_atomic_null_value:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    sync
@@ -162,12 +163,12 @@ define void @store_atomic_null_value(i32 addrspace(200)* addrspace(200)* %ptr) n
 ; CHECK-NEXT:    sync
 ; CHECK-NEXT:    cjr $c17
 ; CHECK-NEXT:    nop
-  store atomic i32 addrspace(200)* null, i32 addrspace(200)* addrspace(200)* %ptr seq_cst, align 32
+  store atomic ptr addrspace(200) null, ptr addrspace(200) %ptr seq_cst, align 32
   ret void
 }
 
-define i32 addrspace(200)* @atomic_fetch_swap_null_value(i32 addrspace(200)* addrspace(200)* %ptr) nounwind {
-; This used to emit a cgetnull for the value.
+; Function Attrs: nounwind
+define ptr addrspace(200) @atomic_fetch_swap_null_value(ptr addrspace(200) %ptr) #0 {
 ; CHECK-LABEL: atomic_fetch_swap_null_value:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    .insn
@@ -180,12 +181,12 @@ define i32 addrspace(200)* @atomic_fetch_swap_null_value(i32 addrspace(200)* add
 ; CHECK-NEXT:    sync
 ; CHECK-NEXT:    cjr $c17
 ; CHECK-NEXT:    cmove $c3, $c1
-  %t1 = atomicrmw xchg i32 addrspace(200)* addrspace(200)* %ptr, i32 addrspace(200)* null acquire
-  ret i32 addrspace(200)* %t1
+  %t1 = atomicrmw xchg ptr addrspace(200) %ptr, ptr addrspace(200) null acquire
+  ret ptr addrspace(200) %t1
 }
 
-define i32 addrspace(200)* @atomic_fetch_swap_null_ptr(i32 addrspace(200)* %value) nounwind {
-; Cannot use $cnull fr the ptr since zero encodes $ddc
+; Function Attrs: nounwind
+define ptr addrspace(200) @atomic_fetch_swap_null_ptr(ptr addrspace(200) %value) #0 {
 ; CHECK-LABEL: atomic_fetch_swap_null_ptr:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    cgetnull $c2
@@ -198,7 +199,8 @@ define i32 addrspace(200)* @atomic_fetch_swap_null_ptr(i32 addrspace(200)* %valu
 ; CHECK-NEXT:    sync
 ; CHECK-NEXT:    cjr $c17
 ; CHECK-NEXT:    cmove $c3, $c1
-  %t1 = atomicrmw xchg i32 addrspace(200)* addrspace(200)* null, i32 addrspace(200)* %value acquire
-  ret i32 addrspace(200)* %t1
+  %t1 = atomicrmw xchg ptr addrspace(200) null, ptr addrspace(200) %value acquire
+  ret ptr addrspace(200) %t1
 }
 
+attributes #0 = { nounwind }

@@ -4,13 +4,10 @@ source_filename = "cmpcap.c"
 target datalayout = "E-m:e-pf200:128:128:128:64-i8:8:32-i16:16:32-i64:64-n32:64-S128"
 target triple = "cheri-unknown-freebsd"
 
-%struct.bigbuf = type { [5 x i8 addrspace(200)*] }
-
-; Function Attrs: nounwind
-define void @zero(%struct.bigbuf addrspace(200)* nocapture %out) local_unnamed_addr #0 {
+define void @zero(ptr addrspace(200) nocapture %out) local_unnamed_addr {
 entry:
-  %.compoundliteral.sroa.0.0..sroa_cast1 = bitcast %struct.bigbuf addrspace(200)* %out to i8 addrspace(200)*
-  call void @llvm.memset.p200i8.i64(i8 addrspace(200)* align 32 %.compoundliteral.sroa.0.0..sroa_cast1, i8 0, i64 31, i1 false)
+  %.compoundliteral.sroa.0.0..sroa_cast1 = bitcast ptr addrspace(200) %out to ptr addrspace(200)
+  call void @llvm.memset.p200.i64(ptr addrspace(200) align 32 %.compoundliteral.sroa.0.0..sroa_cast1, i8 0, i64 31, i1 false)
 ; Check that the zero memset is expanded to capability stores and a final overlapping store.
 ; CHECK-LABEL: zero:
 ; CHECK-DAG: csc $cnull, $zero, 0($c3)
@@ -22,5 +19,7 @@ entry:
   ret void
 }
 
-; Function Attrs: argmemonly nounwind
-declare void @llvm.memset.p200i8.i64(i8 addrspace(200)* nocapture writeonly, i8, i64, i1) #1
+; Function Attrs: nocallback nofree nounwind willreturn memory(argmem: write)
+declare void @llvm.memset.p200.i64(ptr addrspace(200) nocapture writeonly, i8, i64, i1 immarg) #0
+
+attributes #0 = { nocallback nofree nounwind willreturn memory(argmem: write) }

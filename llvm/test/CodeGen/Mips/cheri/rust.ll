@@ -2,9 +2,10 @@
 ; RUN: %cheri_purecap_llc -o - %s | %cheri_FileCheck %s
 
 ; Crash found while compiling rust-generated code:
-declare { i32 addrspace(200)*, i32 addrspace(200)* } @"_ZN13libcore_cheri5slice29_$LT$impl$u20$$u5b$T$u5d$$GT$4iter17h36a7eda044ca512cE"(i32 addrspace(200)*, i128) addrspace(200)
+declare { ptr addrspace(200), ptr addrspace(200) } @"_ZN13libcore_cheri5slice29_$LT$impl$u20$$u5b$T$u5d$$GT$4iter17h36a7eda044ca512cE"(ptr addrspace(200), i128) addrspace(200)
 
-define void @a() nounwind {
+; Function Attrs: nounwind
+define void @a() addrspace(200) #0 {
 ; CHECK-LABEL: a:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    cincoffset $c11, $c11, -[[#STACKFRAME_SIZE:]]
@@ -20,6 +21,8 @@ define void @a() nounwind {
 ; CHECK-NEXT:    clc $c17, $zero, 0($c11)
 ; CHECK-NEXT:    cjr $c17
 ; CHECK-NEXT:    cincoffset $c11, $c11, [[#STACKFRAME_SIZE]]
-  call { i32 addrspace(200)*, i32 addrspace(200)* } @"_ZN13libcore_cheri5slice29_$LT$impl$u20$$u5b$T$u5d$$GT$4iter17h36a7eda044ca512cE"(i32 addrspace(200)* null, i128 6)
+  %1 = call { ptr addrspace(200), ptr addrspace(200) } @"_ZN13libcore_cheri5slice29_$LT$impl$u20$$u5b$T$u5d$$GT$4iter17h36a7eda044ca512cE"(ptr addrspace(200) null, i128 6)
   ret void
 }
+
+attributes #0 = { nounwind }

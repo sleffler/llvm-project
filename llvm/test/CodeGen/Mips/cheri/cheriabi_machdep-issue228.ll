@@ -10,34 +10,37 @@ define void @CHERIABI_SYS_mknodat_fill_uap() #0 {
 ; CHECK-NEXT:    sll $1, $1, 0
 ; CHECK-NEXT:    sh $1, 0($1)
 cheriabi_fetch_syscall_arg.exit119:
-  %0 = ptrtoint i8 addrspace(200)* undef to i16
-  store i16 %0, i16* undef, align 2
+  %0 = ptrtoint ptr addrspace(200) undef to i16
+  store i16 %0, ptr undef, align 2
   unreachable
 }
 
+; Function Attrs: inlinehint nounwind
 define void @CHERIABI_SYS_mknodat_fill_uap1() #0 {
 ; CHECK-LABEL: CHERIABI_SYS_mknodat_fill_uap1:
 ; CHECK:       # %bb.0: # %cheriabi_fetch_syscall_arg.exit119
 ; CHECK-NEXT:    .insn
 cheriabi_fetch_syscall_arg.exit119:
-  %0 = getelementptr i8, i8 addrspace(200)* null, i64 undef
-  store i8 addrspace(200)* %0, i8 addrspace(200)** undef, align 16
+  %0 = getelementptr i8, ptr addrspace(200) null, i64 undef
+  store ptr addrspace(200) %0, ptr undef, align 16
   unreachable
 }
 
-define void @CHERIABI_SYS_mknodat_fill_uap2(i8 addrspace(200)* %arg) #0 {
+; Function Attrs: inlinehint nounwind
+define void @CHERIABI_SYS_mknodat_fill_uap2(ptr addrspace(200) %arg) #0 {
 ; CHECK-LABEL: CHERIABI_SYS_mknodat_fill_uap2:
 ; CHECK:       # %bb.0: # %cheriabi_fetch_syscall_arg.exit119
 ; CHECK-NEXT:    ctoptr $1, $c3, $ddc
 ; CHECK-NEXT:    sll $1, $1, 0
 ; CHECK-NEXT:    sh $1, 0($1)
 cheriabi_fetch_syscall_arg.exit119:
-  %0 = ptrtoint i8 addrspace(200)* %arg to i16
-  store i16 %0, i16* undef, align 2
+  %0 = ptrtoint ptr addrspace(200) %arg to i16
+  store i16 %0, ptr undef, align 2
   unreachable
 }
 
-define void @CHERIABI_SYS_mknodat_fill_uap3(i8 addrspace(200)* %arg, i16 * %ptr) #0 {
+; Function Attrs: inlinehint nounwind
+define void @CHERIABI_SYS_mknodat_fill_uap3(ptr addrspace(200) %arg, ptr %ptr) #0 {
 ; CHECK-LABEL: CHERIABI_SYS_mknodat_fill_uap3:
 ; CHECK:       # %bb.0: # %cheriabi_fetch_syscall_arg.exit119
 ; CHECK-NEXT:    ctoptr $1, $c3, $ddc
@@ -45,8 +48,8 @@ define void @CHERIABI_SYS_mknodat_fill_uap3(i8 addrspace(200)* %arg, i16 * %ptr)
 ; CHECK-NEXT:    jr $ra
 ; CHECK-NEXT:    sh $1, 0($4)
 cheriabi_fetch_syscall_arg.exit119:
-  %0 = ptrtoint i8 addrspace(200)* %arg to i16
-  store i16 %0, i16* %ptr, align 2
+  %0 = ptrtoint ptr addrspace(200) %arg to i16
+  store i16 %0, ptr %ptr, align 2
   ret void
 }
 

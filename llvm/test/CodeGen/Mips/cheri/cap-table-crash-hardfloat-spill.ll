@@ -5,7 +5,8 @@
 ; This code now is not quite ideal (we should probably access the constants differently)
 ; but it mostly matches mips
 
-define float @return_constant_pool() nounwind readnone {
+; Function Attrs: nounwind memory(none)
+define float @return_constant_pool() #0 {
 ; N64-LABEL: return_constant_pool:
 ; N64:       # %bb.0: # %entry
 ; N64-NEXT:    lui $1, %hi(%neg(%gp_rel(return_constant_pool)))
@@ -26,13 +27,12 @@ define float @return_constant_pool() nounwind readnone {
 ; PURECAP-NEXT:    mtc1 $1, $f0
 ; PURECAP-NEXT:    cjr $c17
 ; PURECAP-NEXT:    nop
-
-
 entry:
-  ret float 8.0
+  ret float 8.000000e+00
 }
 
-define double @return_constant_pool2() nounwind readnone {
+; Function Attrs: nounwind memory(none)
+define double @return_constant_pool2() #0 {
 ; N64-LABEL: return_constant_pool2:
 ; N64:       # %bb.0: # %entry
 ; N64-NEXT:    lui $1, %hi(%neg(%gp_rel(return_constant_pool2)))
@@ -53,14 +53,12 @@ define double @return_constant_pool2() nounwind readnone {
 ; PURECAP-NEXT:    dmtc1 $1, $f0
 ; PURECAP-NEXT:    cjr $c17
 ; PURECAP-NEXT:    nop
-
-
 entry:
-  ret double 12.0
+  ret double 1.200000e+01
 }
 
-%struct.a = type { }
-define void @b() nounwind {
+; Function Attrs: nounwind
+define void @b() #1 {
 ; N64-LABEL: b:
 ; N64:       # %bb.0:
 ; N64-NEXT:    daddiu $sp, $sp, -16
@@ -94,7 +92,11 @@ define void @b() nounwind {
 ; PURECAP-NEXT:    cjalr $c12, $c17
 ; PURECAP-NEXT:    nop
   %c = fmul double undef, undef
-  call void @d(%struct.a addrspace(200)* undef, %struct.a addrspace(200)* undef, i32 undef, double %c)
+  call void @d(ptr addrspace(200) undef, ptr addrspace(200) undef, i32 undef, double %c)
   unreachable
 }
-declare void @d(%struct.a addrspace(200)*, %struct.a addrspace(200)*, i32 , double)
+
+declare void @d(ptr addrspace(200), ptr addrspace(200), i32, double)
+
+attributes #0 = { nounwind memory(none) }
+attributes #1 = { nounwind }

@@ -18,7 +18,7 @@
 
 
 ; Function Attrs: norecurse nounwind
-define void @doLoop_cap(i8 addrspace(200)* nocapture readonly %in, i8 addrspace(200)* nocapture %out, i32 signext %i) local_unnamed_addr norecurse nounwind {
+define void @doLoop_cap(ptr addrspace(200) nocapture readonly %in, ptr addrspace(200) nocapture %out, i32 signext %i) local_unnamed_addr #0 {
 ; CHECK-LABEL: doLoop_cap:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    daddiu $2, $zero, -1
@@ -38,10 +38,10 @@ entry:
 
 do.body:                                          ; preds = %do.body, %entry
   %indvars.iv = phi i64 [ %indvars.iv.next, %do.body ], [ %0, %entry ]
-  %arrayidx = getelementptr inbounds i8, i8 addrspace(200)* %in, i64 %indvars.iv
-  %1 = load i8, i8 addrspace(200)* %arrayidx, align 1
-  %arrayidx2 = getelementptr inbounds i8, i8 addrspace(200)* %out, i64 %indvars.iv
-  store i8 %1, i8 addrspace(200)* %arrayidx2, align 1
+  %arrayidx = getelementptr inbounds i8, ptr addrspace(200) %in, i64 %indvars.iv
+  %1 = load i8, ptr addrspace(200) %arrayidx, align 1
+  %arrayidx2 = getelementptr inbounds i8, ptr addrspace(200) %out, i64 %indvars.iv
+  store i8 %1, ptr addrspace(200) %arrayidx2, align 1
   %indvars.iv.next = add nsw i64 %indvars.iv, -1
   %2 = icmp eq i64 %indvars.iv, 0
   br i1 %2, label %do.end, label %do.body
@@ -51,7 +51,7 @@ do.end:                                           ; preds = %do.body
 }
 
 ; Function Attrs: norecurse nounwind
-define void @doLoop_ptr(i8* nocapture readonly %in, i8* nocapture %out, i32 signext %i) local_unnamed_addr norecurse nounwind {
+define void @doLoop_ptr(ptr nocapture readonly %in, ptr nocapture %out, i32 signext %i) local_unnamed_addr #0 {
 ; CHECK-LABEL: doLoop_ptr:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    daddiu $2, $zero, -1
@@ -72,10 +72,10 @@ entry:
 
 do.body:                                          ; preds = %do.body, %entry
   %indvars.iv = phi i64 [ %indvars.iv.next, %do.body ], [ %0, %entry ]
-  %arrayidx = getelementptr inbounds i8, i8* %in, i64 %indvars.iv
-  %1 = load i8, i8* %arrayidx, align 1
-  %arrayidx2 = getelementptr inbounds i8, i8* %out, i64 %indvars.iv
-  store i8 %1, i8* %arrayidx2, align 1
+  %arrayidx = getelementptr inbounds i8, ptr %in, i64 %indvars.iv
+  %1 = load i8, ptr %arrayidx, align 1
+  %arrayidx2 = getelementptr inbounds i8, ptr %out, i64 %indvars.iv
+  store i8 %1, ptr %arrayidx2, align 1
   %indvars.iv.next = add nsw i64 %indvars.iv, -1
   %2 = icmp eq i64 %indvars.iv, 0
   br i1 %2, label %do.end, label %do.body
@@ -83,3 +83,5 @@ do.body:                                          ; preds = %do.body, %entry
 do.end:                                           ; preds = %do.body
   ret void
 }
+
+attributes #0 = { norecurse nounwind }

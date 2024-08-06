@@ -13,7 +13,8 @@
 ;   ret void
 ; }
 
-define void @foo(i8 addrspace(200)* %arg) nounwind {
+; Function Attrs: nounwind
+define void @foo(ptr addrspace(200) %arg) #0 {
 ; N64-LABEL: foo:
 ; N64:       # %bb.0: # %entry
 ; N64-NEXT:    daddiu $sp, $sp, -16
@@ -40,20 +41,24 @@ define void @foo(i8 addrspace(200)* %arg) nounwind {
 ; CAPTABLE-NEXT:    cjr $c17
 ; CAPTABLE-NEXT:    nop
 entry:
-  call void @test(i8 addrspace(200)* %arg)
+  call void @test(ptr addrspace(200) %arg)
   ret void
 }
 
-; Function Attrs: nounwind
-declare i8 addrspace(200)* @llvm.stacksave.p200i8() #1
+declare void @test(ptr addrspace(200))
 
-declare void @test(i8 addrspace(200)*) #2
+; Function Attrs: nounwind willreturn memory(none)
+declare ptr addrspace(200) @llvm.cheri.pcc.get() #1
 
-; Function Attrs: nounwind readnone
-declare i8 addrspace(200)* @llvm.cheri.pcc.get() #3
+; Function Attrs: nounwind willreturn memory(none)
+declare ptr addrspace(200) @llvm.cheri.cap.offset.set.i64(ptr addrspace(200), i64) #1
 
-; Function Attrs: nounwind readnone
-declare i8 addrspace(200)* @llvm.cheri.cap.offset.set.i64(i8 addrspace(200)*, i64) #3
+; Function Attrs: nocallback nofree nosync nounwind willreturn
+declare ptr addrspace(200) @llvm.stacksave.p200() #2
 
-; Function Attrs: nounwind
-declare void @llvm.stackrestore.p200i8(i8 addrspace(200)*) #1
+; Function Attrs: nocallback nofree nosync nounwind willreturn
+declare void @llvm.stackrestore.p200(ptr addrspace(200)) #2
+
+attributes #0 = { nounwind }
+attributes #1 = { nounwind willreturn memory(none) }
+attributes #2 = { nocallback nofree nosync nounwind willreturn }

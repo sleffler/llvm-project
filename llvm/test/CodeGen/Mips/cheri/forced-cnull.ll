@@ -3,7 +3,8 @@
 ; This is reduced from FreeBSD's crt1.c and triggered a segfault. Check we
 ; don't try to remove the cgetnull for the inline assembly's operand.
 
-define void @cgetnull_asm() addrspace(200) nounwind {
+; Function Attrs: nounwind
+define void @cgetnull_asm() addrspace(200) #0 {
 ; CHECK-LABEL: cgetnull_asm:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    cgetnull $c1
@@ -12,6 +13,8 @@ define void @cgetnull_asm() addrspace(200) nounwind {
 ; CHECK-NEXT:    cjr $c17
 ; CHECK-NEXT:    nop
 entry:
-  call void asm sideeffect "", "C,~{$1}"(i8 addrspace(200)* null)
+  call void asm sideeffect "", "C,~{$1}"(ptr addrspace(200) null)
   ret void
 }
+
+attributes #0 = { nounwind }
