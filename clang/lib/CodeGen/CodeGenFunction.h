@@ -559,7 +559,7 @@ public:
   bool InCheriContainerBoundsEmission = false;
   struct TightenBoundsResult {
     // either a fixed size or when UseRemainingSize is set the maximum size
-    Optional<uint64_t> Size;
+    std::optional<uint64_t> Size;
     bool IsSubObject = false;
     bool IsContainerSize = false;
     bool UseRemainingSize = false;
@@ -4425,7 +4425,7 @@ public:
                                               const ArraySubscriptExpr *E);
   llvm::Value *setCHERIBoundsOnArrayDecay(llvm::Value *Ptr, const Expr *E);
 
-  Optional<TightenBoundsResult>
+  std::optional<TightenBoundsResult>
   canTightenCheriBounds(QualType Ty, const Expr *E, SubObjectBoundsKind Kind);
 
   //===--------------------------------------------------------------------===//

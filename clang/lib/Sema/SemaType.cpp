@@ -2475,7 +2475,7 @@ bool Sema::checkArrayElementAlignment(QualType EltTy, SourceLocation Loc) {
 QualType Sema::BuildArrayType(QualType T, ArrayType::ArraySizeModifier ASM,
                               Expr *ArraySize, unsigned Quals,
                               SourceRange Brackets, DeclarationName Entity,
-                              llvm::Optional<PointerInterpretationKind> PIK) {
+                              std::optional<PointerInterpretationKind> PIK) {
 
   SourceLocation Loc = Brackets.getBegin();
   if (getLangOpts().CPlusPlus) {
@@ -5178,7 +5178,7 @@ static TypeSourceInfo *GetFullTypeForDeclarator(TypeProcessingState &state,
       // Array parameters have an interpretation based on the qualifiers
       // (deferred until attribute parsing) and default interpretation. All
       // other arrays are implicit based on their container (if any).
-      llvm::Optional<PointerInterpretationKind> PIK = std::nullopt;
+      std::optional<PointerInterpretationKind> PIK = std::nullopt;
       if (D.isPrototypeContext() &&
           !hasOuterPointerLikeChunk(D, chunkIndex))
         PIK = Context.getDefaultPointerInterpretation();

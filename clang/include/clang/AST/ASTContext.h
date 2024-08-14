@@ -1456,7 +1456,7 @@ public:
                                 ArrayType::ArraySizeModifier ASM,
                                 unsigned IndexTypeQuals,
                                 SourceRange Brackets,
-                                llvm::Optional<PointerInterpretationKind>
+                                std::optional<PointerInterpretationKind>
                                 PIK = std::nullopt) const;
 
   /// Return a non-unique reference to the type for a dependently-sized
@@ -1468,7 +1468,7 @@ public:
                                       ArrayType::ArraySizeModifier ASM,
                                       unsigned IndexTypeQuals,
                                       SourceRange Brackets,
-                                      llvm::Optional<PointerInterpretationKind>
+                                      std::optional<PointerInterpretationKind>
                                       PIK = std::nullopt) const;
 
   /// Return a unique reference to the type for an incomplete array of
@@ -1476,7 +1476,7 @@ public:
   QualType getIncompleteArrayType(QualType EltTy,
                                   ArrayType::ArraySizeModifier ASM,
                                   unsigned IndexTypeQuals,
-                                  llvm::Optional<PointerInterpretationKind>
+                                  std::optional<PointerInterpretationKind>
                                   PIK = std::nullopt) const;
 
 
@@ -1486,7 +1486,7 @@ public:
                                 const Expr *SizeExpr,
                                 ArrayType::ArraySizeModifier ASM,
                                 unsigned IndexTypeQuals,
-                                llvm::Optional<PointerInterpretationKind>
+                                std::optional<PointerInterpretationKind>
                                 PIK = std::nullopt) const;
 
   /// Return a type for a constant array for a string literal of the
@@ -2808,7 +2808,7 @@ public:
   ///
   /// See C99 6.7.5.3p7 and C99 6.3.2.1p3.
   QualType getArrayDecayedType(QualType T,
-                               llvm::Optional<PointerInterpretationKind>
+                               std::optional<PointerInterpretationKind>
                                PIKFromBase = std::nullopt) const;
 
   /// Return the type that \p PromotableType will promote to: C99
