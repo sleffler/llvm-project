@@ -330,7 +330,7 @@ def main():
         continue
 
       check_prefixes = common.get_check_prefixes(filecheck_cmd)
-      run_list.append((check_prefixes, clang_args, commands[1:-1], triple_in_cmd))
+      run_list.append((check_prefixes, pipeline, triple_in_cmd))
 
     # Execute clang, generate LLVM IR, and extract functions.
 
