@@ -11303,14 +11303,14 @@ void RISCVTargetLowering::computeKnownBitsForTargetNode(const SDValue Op,
           (KnownLengthBits.Zero | KnownLengthBits.One).getZExtValue();
 
       // Calculate bits for property (1)
-      uint64_t LeadingKnownBits = countLeadingOnes(MinMaxRoundedAgreeMask);
+      uint64_t LeadingKnownBits = llvm::countl_one(MinMaxRoundedAgreeMask);
       uint64_t LeadingKnownMask =
           MinRoundedOverflow == MaxRoundedOverflow
               ? maskLeadingOnes<uint64_t>(LeadingKnownBits)
               : 0;
 
       // Calculate bits for property (2)
-      uint64_t TrailingKnownBits = countTrailingOnes(MinMaxRoundedAgreeMask);
+      uint64_t TrailingKnownBits = llvm::countr_one(MinMaxRoundedAgreeMask);
       uint64_t TrailingKnownMask =
           maskTrailingOnes<uint64_t>(TrailingKnownBits) & InputKnownMask;
 
@@ -13855,11 +13855,11 @@ bool RISCVTargetLowering::isUsedByReturnOnly(SDNode *N, SDValue &Chain) const {
     return false;
 
   SDNode *Copy = *N->use_begin();
-  
+
   if (Copy->getOpcode() == ISD::BITCAST) {
     return isUsedByReturnOnly(Copy, Chain);
   }
-  
+
   // TODO: Handle additional opcodes in order to support tail-calling libcalls
   // with soft float ABIs.
   if (Copy->getOpcode() != ISD::CopyToReg) {
