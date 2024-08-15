@@ -7,7 +7,7 @@
 ; use as safe and doesn't interfere by inserting bounds on the FrameIndex
 ; before the GEP/PTRADD.
 define void @foo() nounwind {
-  %x = alloca [2 x i8], align 1, addrspace(200)
+  %x = alloca [2 x i8], addrspace(200)
   %x_plus_1 = getelementptr inbounds [2 x i8], [2 x i8] addrspace(200)* %x, iCAPRANGE 0, iCAPRANGE 1
   %p = call i8 addrspace(200)* @llvm.cheri.cap.bounds.set.iCAPRANGE(i8 addrspace(200)* %x_plus_1, iCAPRANGE 0)
   call void @bar(i8 addrspace(200)* %p)
