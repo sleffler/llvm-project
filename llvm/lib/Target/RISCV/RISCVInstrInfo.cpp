@@ -1305,6 +1305,18 @@ RISCVInstrInfo::optimizeSelect(MachineInstr &MI,
   return NewMI;
 }
 
+static bool IsRVVInitUndefOpcode(unsigned Opc) {
+  switch (Opc) {
+  default:
+    return false;
+  case RISCV::PseudoRVVInitUndefM1:
+  case RISCV::PseudoRVVInitUndefM2:
+  case RISCV::PseudoRVVInitUndefM4:
+  case RISCV::PseudoRVVInitUndefM8:
+    return true;
+  }
+}
+
 unsigned RISCVInstrInfo::getInstSizeInBytes(const MachineInstr &MI) const {
   if (MI.isMetaInstruction())
     return 0;
@@ -1326,7 +1338,8 @@ unsigned RISCVInstrInfo::getInstSizeInBytes(const MachineInstr &MI) const {
   auto Result = get(Opcode).getSize();
   // Check that all pseudos have the appropriate size defined in tablegen.
   // TODO: is returning 0 for COPY correct or should we be more conservative?
-  if (Result == 0 && MI.isPseudo() && isTargetSpecificOpcode(Opcode))
+  if (Result == 0 && MI.isPseudo() && isTargetSpecificOpcode(Opcode) &&
+      !IsRVVInitUndefOpcode(Opcode))
     report_fatal_error("Unexpected zero size for pseudo: " + getName(Opcode));
   return Result;
 }
