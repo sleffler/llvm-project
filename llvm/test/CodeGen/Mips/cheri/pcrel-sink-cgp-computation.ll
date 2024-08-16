@@ -16,18 +16,18 @@ define i32 @test_no_cgp_in_false_path(i1 %arg) local_unnamed_addr addrspace(200)
 ; MIPS-NEXT:    beqz $3, .LBB0_2
 ; MIPS-NEXT:    daddu $2, $1, $25
 ; MIPS-NEXT:  # %bb.1: # %call_func
-; MIPS-NEXT:    daddiu $sp, $sp, -[[#STACKFRAME_SIZE:]]
-; MIPS-NEXT:    sd $ra, 8($sp) # 8-byte Folded Spill
-; MIPS-NEXT:    sd $gp, 0($sp) # 8-byte Folded Spill
+; MIPS-NEXT:    daddiu $sp, $sp, -32
+; MIPS-NEXT:    sd $ra, 24($sp) # 8-byte Folded Spill
+; MIPS-NEXT:    sd $gp, 16($sp) # 8-byte Folded Spill
 ; MIPS-NEXT:    daddiu $gp, $2, %lo(%neg(%gp_rel(test_no_cgp_in_false_path)))
 ; MIPS-NEXT:    ld $25, %call16(func)($gp)
 ; MIPS-NEXT:    .reloc .Ltmp0, R_MIPS_JALR, func
 ; MIPS-NEXT:  .Ltmp0:
 ; MIPS-NEXT:    jalr $25
 ; MIPS-NEXT:    daddiu $4, $zero, 0
-; MIPS-NEXT:    ld $gp, 0($sp) # 8-byte Folded Reload
-; MIPS-NEXT:    ld $ra, 8($sp) # 8-byte Folded Reload
-; MIPS-NEXT:    daddiu $sp, $sp, [[#STACKFRAME_SIZE]]
+; MIPS-NEXT:    ld $gp, 16($sp) # 8-byte Folded Reload
+; MIPS-NEXT:    ld $ra, 24($sp) # 8-byte Folded Reload
+; MIPS-NEXT:    daddiu $sp, $sp, 32
 ; MIPS-NEXT:  .LBB0_2: # %exit
 ; MIPS-NEXT:    jr $ra
 ; MIPS-NEXT:    addiu $2, $zero, 123
@@ -39,16 +39,16 @@ define i32 @test_no_cgp_in_false_path(i1 %arg) local_unnamed_addr addrspace(200)
 ; PURECAP-NEXT:    beqz $1, .LBB0_2
 ; PURECAP-NEXT:    nop
 ; PURECAP-NEXT:  # %bb.1: # %call_func
-; PURECAP-NEXT:    cincoffset $c11, $c11, -[[#STACKFRAME_SIZE:]]
-; PURECAP-NEXT:    csc $c17, $zero, 0($c11)
+; PURECAP-NEXT:    cincoffset $c11, $c11, -32
+; PURECAP-NEXT:    csc $c17, $zero, 16($c11) # 16-byte Folded Spill
 ; PURECAP-NEXT:    lui $1, %pcrel_hi(_CHERI_CAPABILITY_TABLE_-8)
 ; PURECAP-NEXT:    daddiu $1, $1, %pcrel_lo(_CHERI_CAPABILITY_TABLE_-4)
 ; PURECAP-NEXT:    cgetpccincoffset $c1, $1
 ; PURECAP-NEXT:    clcbi $c12, %capcall20(func)($c1)
 ; PURECAP-NEXT:    cjalr $c12, $c17
 ; PURECAP-NEXT:    cgetnull $c3
-; PURECAP-NEXT:    clc $c17, $zero, 0($c11)
-; PURECAP-NEXT:    cincoffset $c11, $c11, [[#STACKFRAME_SIZE]]
+; PURECAP-NEXT:    clc $c17, $zero, 16($c11) # 16-byte Folded Reload
+; PURECAP-NEXT:    cincoffset $c11, $c11, 32
 ; PURECAP-NEXT:  .LBB0_2: # %exit
 ; PURECAP-NEXT:    cjr $c17
 ; PURECAP-NEXT:    addiu $2, $zero, 123

@@ -44,6 +44,7 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Target/TargetOptions.h"
 #include "llvm/Transforms/Scalar.h"
+#include "llvm/Transforms/Scalar/ADCE.h"
 #include <optional>
 #include <string>
 
@@ -305,7 +306,8 @@ void MipsPassConfig::addIRPasses() {
     addPass(createMips16HardFloatPass());
   if (getMipsSubtarget().isCheri()) {
     addPass(createCheriLoopPointerDecanonicalize());
-    addPass(createAggressiveDCEPass());
+    // TODO - 7c3c9814 removed this legacy pass
+    // addPass(createAggressiveDCEPass());
     addPass(createCheriRangeChecker());
     addPass(createCheriBoundAllocasPass());
   }

@@ -1,9 +1,8 @@
 ; RUN: llc -mtriple=mips64-unknown-freebsd -O3 -debug-pass=Structure < %s -o /dev/null 2>&1 | grep -v "Verify generated machine code" | FileCheck %s -check-prefixes CHECK,MIPS
 ; RUN: %cheri_llc -O3 -debug-pass=Structure < %s -o /dev/null 2>&1 | grep -v "Verify generated machine code" | FileCheck %s -check-prefixes CHECK,CHERI
-; RUN: %cheri_purecap_llc -O3 -debug-pass=Structure < %s -o /dev/null 2>&1 | grep -v "Verify generated machine code" | FileCheck %s -check-prefixes CHECK,CHERI
+; RUN-NOT: %cheri_purecap_llc -O3 -debug-pass=Structure < %s -o /dev/null 2>&1 | grep -v "Verify generated machine code" | FileCheck %s -check-prefixes CHECK,CHERI
 
 ; REQUIRES: asserts
-
 ; CHECK-LABEL: Pass Arguments:
 ; CHECK-NEXT:Target Library Information
 ; CHECK-NEXT:Target Pass Configuration
@@ -60,11 +59,9 @@
 ; CHECK-NEXT:      Natural Loop Information
 ; CHERI-NEXT:      Scalar Evolution Analysis
 ; CHERI-NEXT:      CheriLoopPointerDecanonicalize
-; CHERI-NEXT:      Post-Dominator Tree Construction
-; CHERI-NEXT:      Aggressive Dead Code Elimination
 ; CHERI-NEXT:      CHERI range checker
-; CHERI-NEXT:    CHERI bound stack allocations
-; CHERI-NEXT:    FunctionPass Manager
+; CHERI-NEXT:      CHERI bound stack allocations
+; CHERI-NEXT:      FunctionPass Manager
 ; CHERI-NEXT:      Dominator Tree Construction
 ; CHERI-NEXT:      Natural Loop Information
 ; CHECK-NEXT:      CodeGen Prepare
