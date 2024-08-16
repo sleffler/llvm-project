@@ -633,8 +633,8 @@ static void findFuncPointers(const Constant *I, uint64_t StartingOffset,
     if (CE->getOpcode() == Instruction::Sub) {
       GlobalValue *LHS, *RHS;
       APSInt LHSOffset, RHSOffset;
-      if (IsConstantOffsetFromGlobal(CE->getOperand(0), LHS, LHSOffset, DL) &&
-          IsConstantOffsetFromGlobal(CE->getOperand(1), RHS, RHSOffset, DL) &&
+      if (IsConstantOffsetFromGlobal(CE->getOperand(0), LHS, LHSOffset, DL, false) &&
+          IsConstantOffsetFromGlobal(CE->getOperand(1), RHS, RHSOffset, DL, false) &&
           RHS == &OrigGV &&
 
           // For relative vtables, this component should point to the callable
