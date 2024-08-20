@@ -1279,7 +1279,7 @@ performCIncOffsetToCandAddrCombine(SDNode *N, SelectionDAG &DAG,
   if (SecondOperand->getOpcode() != ISD::SUB)
     return SDValue();
   if (auto SubConst = dyn_cast<ConstantSDNode>(SecondOperand->getOperand(0))) {
-    if (!SubConst->isNullValue())
+    if (!SubConst->isZero())
       return SDValue();
   } else {
     return SDValue();
