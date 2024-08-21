@@ -1972,8 +1972,10 @@ Value *llvm::emitHotColdNew(Value *Num, IRBuilderBase &B,
     return nullptr;
 
   StringRef Name = TLI->getName(NewFunc);
-  FunctionCallee Func = M->getOrInsertFunction(Name, B.getInt8PtrTy(),
-                                               Num->getType(), B.getInt8Ty());
+  const DataLayout &DL = M->getDataLayout();
+  FunctionCallee Func =
+      M->getOrInsertFunction(Name, B.getInt8PtrTy(DL.getGlobalsAddressSpace()),
+                             Num->getType(), B.getInt8Ty());
   inferNonMandatoryLibFuncAttrs(M, Name, *TLI);
   CallInst *CI = B.CreateCall(Func, {Num, B.getInt8(HotCold)}, Name);
 
@@ -1992,9 +1994,10 @@ Value *llvm::emitHotColdNewNoThrow(Value *Num, Value *NoThrow, IRBuilderBase &B,
     return nullptr;
 
   StringRef Name = TLI->getName(NewFunc);
+  const DataLayout &DL = M->getDataLayout();
   FunctionCallee Func =
-      M->getOrInsertFunction(Name, B.getInt8PtrTy(), Num->getType(),
-                             NoThrow->getType(), B.getInt8Ty());
+      M->getOrInsertFunction(Name, B.getInt8PtrTy(DL.getGlobalsAddressSpace()),
+                             Num->getType(), NoThrow->getType(), B.getInt8Ty());
   inferNonMandatoryLibFuncAttrs(M, Name, *TLI);
   CallInst *CI = B.CreateCall(Func, {Num, NoThrow, B.getInt8(HotCold)}, Name);
 
@@ -2013,8 +2016,10 @@ Value *llvm::emitHotColdNewAligned(Value *Num, Value *Align, IRBuilderBase &B,
     return nullptr;
 
   StringRef Name = TLI->getName(NewFunc);
-  FunctionCallee Func = M->getOrInsertFunction(
-      Name, B.getInt8PtrTy(), Num->getType(), Align->getType(), B.getInt8Ty());
+  const DataLayout &DL = M->getDataLayout();
+  FunctionCallee Func =
+      M->getOrInsertFunction(Name, B.getInt8PtrTy(DL.getGlobalsAddressSpace()),
+                             Num->getType(), Align->getType(), B.getInt8Ty());
   inferNonMandatoryLibFuncAttrs(M, Name, *TLI);
   CallInst *CI = B.CreateCall(Func, {Num, Align, B.getInt8(HotCold)}, Name);
 
@@ -2034,9 +2039,10 @@ Value *llvm::emitHotColdNewAlignedNoThrow(Value *Num, Value *Align,
     return nullptr;
 
   StringRef Name = TLI->getName(NewFunc);
+  const DataLayout &DL = M->getDataLayout();
   FunctionCallee Func = M->getOrInsertFunction(
-      Name, B.getInt8PtrTy(), Num->getType(), Align->getType(),
-      NoThrow->getType(), B.getInt8Ty());
+      Name, B.getInt8PtrTy(DL.getGlobalsAddressSpace()), Num->getType(),
+      Align->getType(), NoThrow->getType(), B.getInt8Ty());
   inferNonMandatoryLibFuncAttrs(M, Name, *TLI);
   CallInst *CI =
       B.CreateCall(Func, {Num, Align, NoThrow, B.getInt8(HotCold)}, Name);
