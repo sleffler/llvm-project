@@ -986,7 +986,7 @@ void Parser::ParseCapabilityQualifier(ParsedAttributes &Attrs) {
     Diag(AttrNameLoc, diag::err_cheri_capability_qualifier_not_supported);
   else
     Attrs.addNew(AttrName, AttrNameLoc, nullptr, AttrNameLoc, nullptr, 0,
-                 ParsedAttr::AS_Keyword);
+                 Tok.getKind());
 }
 
 static bool VersionNumberSeparator(const char Separator) {
