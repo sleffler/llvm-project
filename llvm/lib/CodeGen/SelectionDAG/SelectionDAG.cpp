@@ -12620,8 +12620,10 @@ SDValue SelectionDAG::makeStateFunctionCall(unsigned LibFunc, SDValue Ptr,
   Entry.Ty = Ptr.getValueType().getTypeForEVT(*getContext());
   Args.push_back(Entry);
   RTLIB::Libcall LC = static_cast<RTLIB::Libcall>(LibFunc);
-  SDValue Callee = getExternalSymbol(TLI->getLibcallName(LC),
-                                     TLI->getPointerTy(getDataLayout()));
+  SDValue Callee = getExternalSymbol(
+      TLI->getLibcallName(LC),
+      TLI->getPointerTy(getDataLayout(),
+                        getDataLayout().getGlobalsAddressSpace()));
   TargetLowering::CallLoweringInfo CLI(*this);
   CLI.setDebugLoc(DLoc).setChain(InChain).setLibCallee(
       TLI->getLibcallCallingConv(LC), Type::getVoidTy(*getContext()), Callee,
