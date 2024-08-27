@@ -2412,7 +2412,7 @@ def Packed : InheritableAttr {
 // CHERI-related attributes
 
 def CHERICapability : TypeAttr {
-  let Spellings = [Keyword<"__capability">];
+  let Spellings = [CustomKeyword<"__capability">];
   let Documentation = [Undocumented];
 }
 def MemoryAddress : TypeAttr {
