@@ -66,10 +66,6 @@ public:
   // Removed upstream, needed for CHERI
   SmallVector<Symbol *, 0> &getSymbols() { return symVector; }
   
-  // The Map of __acle_se_<sym>, <sym> pairs found in the input objects.
-  // Key is the <sym> name.
-  llvm::SmallMapVector<StringRef, ArmCmseEntryFunction, 1> cmseSymMap;
-
   // Map of symbols defined in the Arm CMSE import library. The linker must
   // preserve the addresses in the output objects.
   llvm::StringMap<Defined *> cmseImportLib;
