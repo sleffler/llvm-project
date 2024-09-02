@@ -1245,8 +1245,8 @@ def : Pat<(int_cheri_cap_from_pointer (int_cheri_ddc_get), (XLenVT GPR:$rs2)),
           (CFromPtr DDC, $rs2)>;
 }  // let Predicates = [HasCheri, NotCheriISAv9]
 def : Pat<(XLenVT (int_cheri_cap_diff GPCR:$cs1, GPCR:$cs2)),
-          (SUB (EXTRACT_SUBREG GPCR:$cs1, sub_cap_addr),
-               (EXTRACT_SUBREG GPCR:$cs2, sub_cap_addr))>;
+          (SUB (XLenVT (EXTRACT_SUBREG GPCR:$cs1, sub_cap_addr)),
+               (XLenVT (EXTRACT_SUBREG GPCR:$cs2, sub_cap_addr)))>;
 
 let Predicates = [IsPureCapABI] in {
 def : Pat<(inttoptr (XLenVT GPR:$rs2)), (CIncOffset C0, GPR:$rs2)>;
@@ -1274,24 +1274,24 @@ def : Pat<(ptrtoint (CLenVT (inttoptr (XLenVT 0)))),
 class CheriSetCCPatGpcrGpcr<PatFrag CondOp, dag GprGprDag>
     : Pat<(XLenVT (CondOp GPCR:$cs1, GPCR:$cs2)),
           (OutPatFrag<(ops node:$rs1, node:$rs2), GprGprDag>
-            (EXTRACT_SUBREG GPCR:$cs1, sub_cap_addr),
-            (EXTRACT_SUBREG GPCR:$cs2, sub_cap_addr))>;
+            (XLenVT (EXTRACT_SUBREG GPCR:$cs1, sub_cap_addr)),
+            (XLenVT (EXTRACT_SUBREG GPCR:$cs2, sub_cap_addr)))>;
 
 multiclass CheriSetCCPatGpcrImm<PatFrag CondOp, Operand ImmTy, dag GprImmDag> {
   def : Pat<(XLenVT (CondOp GPCR:$cs1, (inttoptr ImmTy:$imm12))),
             (OutPatFrag<(ops node:$rs1, node:$imm12), GprImmDag>
-              (EXTRACT_SUBREG GPCR:$cs1, sub_cap_addr), ImmTy:$imm12)>;
+              (XLenVT (EXTRACT_SUBREG GPCR:$cs1, sub_cap_addr)), ImmTy:$imm12)>;
   def : Pat<(XLenVT (CondOp GPCR:$cs1, (cptradd (inttoptr (XLenVT 0)), ImmTy:$imm12))),
             (OutPatFrag<(ops node:$rs1, node:$imm12), GprImmDag>
-              (EXTRACT_SUBREG GPCR:$cs1, sub_cap_addr), ImmTy:$imm12)>;
+              (XLenVT (EXTRACT_SUBREG GPCR:$cs1, sub_cap_addr)), ImmTy:$imm12)>;
   def : Pat<(XLenVT (CondOp GPCR:$cs1,
               (int_cheri_cap_offset_set (inttoptr (XLenVT 0)), ImmTy:$imm12))),
             (OutPatFrag<(ops node:$rs1, node:$imm12), GprImmDag>
-              (EXTRACT_SUBREG GPCR:$cs1, sub_cap_addr), ImmTy:$imm12)>;
+              (XLenVT (EXTRACT_SUBREG GPCR:$cs1, sub_cap_addr)), ImmTy:$imm12)>;
   def : Pat<(XLenVT (CondOp GPCR:$cs1,
               (int_cheri_cap_address_set (inttoptr (XLenVT 0)), ImmTy:$imm12))),
             (OutPatFrag<(ops node:$rs1, node:$imm12), GprImmDag>
-              (EXTRACT_SUBREG GPCR:$cs1, sub_cap_addr), ImmTy:$imm12)>;
+              (XLenVT (EXTRACT_SUBREG GPCR:$cs1, sub_cap_addr)), ImmTy:$imm12)>;
 }
 
 multiclass CheriSetCCPatGpcrSimm12<PatFrag CondOp, dag GprImmDag>
@@ -1303,7 +1303,7 @@ multiclass CheriSetCCPatGpcrSimm12Plus1<PatFrag CondOp, dag GprImmDag>
 class CheriSetCCPatGpcrNull<PatFrag CondOp, dag GprDag>
     : Pat<(XLenVT (CondOp GPCR:$cs1, (inttoptr (XLenVT 0)))),
           (OutPatFrag<(ops node:$rs1), GprDag>
-            (EXTRACT_SUBREG GPCR:$cs1, sub_cap_addr))>;
+            (XLenVT (EXTRACT_SUBREG GPCR:$cs1, sub_cap_addr)))>;
 
 class Swap<PatFrag BinFrag>
     : PatFrag<(ops node:$a, node:$b), (BinFrag $b, $a)>;
@@ -1348,8 +1348,8 @@ defm Select_GPCR : SelectCC_GPR_rrirr<GPCR, CLenVT>;
 class CheriBccPat<PatFrag CondOp, RVInstB Inst>
     : Pat<(brcond (XLenVT (CondOp GPCR:$rs1, GPCR:$rs2)), bb:$imm12),
           (Inst
-            (EXTRACT_SUBREG GPCR:$rs1, sub_cap_addr),
-            (EXTRACT_SUBREG GPCR:$rs2, sub_cap_addr),
+            (XLenVT (EXTRACT_SUBREG GPCR:$rs1, sub_cap_addr)),
+            (XLenVT (EXTRACT_SUBREG GPCR:$rs2, sub_cap_addr)),
             simm13_lsb0:$imm12)>;
 
 def : CheriBccPat<seteq, BEQ>;
@@ -1362,8 +1362,8 @@ def : CheriBccPat<setuge, BGEU>;
 class CheriBccSwapPat<PatFrag CondOp, RVInst InstBcc>
     : Pat<(brcond (XLenVT (CondOp GPCR:$rs1, GPCR:$rs2)), bb:$imm12),
           (InstBcc
-            (EXTRACT_SUBREG GPCR:$rs2, sub_cap_addr),
-            (EXTRACT_SUBREG GPCR:$rs1, sub_cap_addr),
+            (XLenVT (EXTRACT_SUBREG GPCR:$rs2, sub_cap_addr)),
+            (XLenVT (EXTRACT_SUBREG GPCR:$rs1, sub_cap_addr)),
             simm13_lsb0:$imm12)>;
 
 def : CheriBccSwapPat<setgt, BLT>;
@@ -1405,14 +1405,14 @@ multiclass CheriExplicitLdPat<PatFrag LoadOp, RVInst Inst,
                               RegisterClass AddrTy,
                               ValueType AddrVt = XLenVT,
                               ValueType ReturnVt = XLenVT> {
-  def : Pat<(ReturnVt (LoadOp (AddrVt AddrTy:$rs1))), (Inst (AddrVt AddrTy:$rs1))>;
+  def : Pat<(ReturnVt (LoadOp (AddrVt AddrTy:$rs1))), (Inst AddrTy:$rs1)>;
 }
 
 multiclass CheriExplicitStPat<PatFrag StoreOp, RVInst Inst,
                               RegisterClass StTy, RegisterClass AddrTy,
                               ValueType StoreVt = XLenVT,
                               ValueType AddrVt = XLenVT> {
-  def : Pat<(StoreOp (StoreVt StTy:$rs2), (AddrVt AddrTy:$rs1)), (Inst (StoreVt StTy:$rs2), (AddrVt AddrTy:$rs1))>;
+  def : Pat<(StoreOp (StoreVt StTy:$rs2), (AddrVt AddrTy:$rs1)), (Inst StTy:$rs2, AddrTy:$rs1)>;
 }
 
 /// DDC-relative loads
