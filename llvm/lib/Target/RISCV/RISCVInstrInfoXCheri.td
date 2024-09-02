@@ -1169,14 +1169,14 @@ def CheriSplitStoreF64Pseudo
 
 } // Predicates = [HasCheri, HasStdExtD, IsRV32]
 
-class PatGpcr<SDPatternOperator OpNode, RVInstCheriSrcDst Inst>
-    : Pat<(OpNode GPCR:$rs1), (Inst GPCR:$rs1)>;
+class PatGpcr<SDPatternOperator OpNode, RVInstCheriSrcDst Inst, ValueType RetVt=XLenVT>
+    : Pat<(RetVt (OpNode GPCR:$rs1)), (Inst GPCR:$rs1)>;
 
-class PatGpcrGpcr<SDPatternOperator OpNode, RVInst Inst>
-    : Pat<(OpNode GPCR:$rs1, GPCR:$rs2), (Inst GPCR:$rs1, GPCR:$rs2)>;
+class PatGpcrGpcr<SDPatternOperator OpNode, RVInst Inst, ValueType RetVt>
+    : Pat<(RetVt (OpNode GPCR:$rs1, GPCR:$rs2)), (Inst GPCR:$rs1, GPCR:$rs2)>;
 
 class PatGpcrGpr<SDPatternOperator OpNode, RVInst Inst>
-    : Pat<(OpNode GPCR:$rs1, GPR:$rs2), (Inst GPCR:$rs1, GPR:$rs2)>;
+    : Pat<(OpNode GPCR:$rs1, (XLenVT GPR:$rs2)), (Inst GPCR:$rs1, GPR:$rs2)>;
 
 class PatGpcrSimm12<SDPatternOperator OpNode, RVInstI Inst>
     : Pat<(OpNode GPCR:$rs1, simm12:$imm12), (Inst GPCR:$rs1, simm12:$imm12)>;
@@ -1197,13 +1197,13 @@ def : PatGpcr<riscv_cap_tag_get, CGetTag>;
 def : PatGpcr<riscv_cap_sealed_get, CGetSealed>;
 def : PatGpcr<int_cheri_cap_offset_get, CGetOffset>;
 def : PatGpcr<int_cheri_cap_flags_get, CGetFlags>;
-def : Pat<(int_cheri_cap_address_get GPCR:$cs1), (PseudoCGetAddr GPCR:$cs1)>;
+def : Pat<(XLenVT (int_cheri_cap_address_get GPCR:$cs1)), (PseudoCGetAddr GPCR:$cs1)>;
 def : PatGpcr<int_cheri_cap_high_get, CGetHigh>;
 
 /// Capability-Modification Instructions
 
-def : PatGpcrGpcr<int_cheri_cap_seal, CSeal>;
-def : PatGpcrGpcr<int_cheri_cap_unseal, CUnseal>;
+def : PatGpcrGpcr<int_cheri_cap_seal, CSeal, CLenVT>;
+def : PatGpcrGpcr<int_cheri_cap_unseal, CUnseal, CLenVT>;
 def : PatGpcrGpr<int_cheri_cap_perms_and, CAndPerm>;
 def : PatGpcrGpr<int_cheri_cap_flags_set, CSetFlags>;
 def : PatGpcrGpr<int_cheri_cap_offset_set, CSetOffset>;
@@ -1214,11 +1214,11 @@ def : PatGpcrSimm12<cptradd, CIncOffsetImm>;
 def : PatGpcrGpr<int_cheri_cap_bounds_set, CSetBounds>;
 def : PatGpcrGpr<int_cheri_cap_bounds_set_exact, CSetBoundsExact>;
 def : PatGpcrUimm12<int_cheri_cap_bounds_set, CSetBoundsImm>;
-def : PatGpcr<int_cheri_cap_tag_clear, CClearTag>;
-def : PatGpcrGpcr<int_cheri_cap_build, CBuildCap>;
-def : PatGpcrGpcr<int_cheri_cap_type_copy, CCopyType>;
-def : PatGpcrGpcr<int_cheri_cap_conditional_seal, CCSeal>;
-def : PatGpcr<int_cheri_cap_seal_entry, CSealEntry>;
+def : PatGpcr<int_cheri_cap_tag_clear, CClearTag, CLenVT>;
+def : PatGpcrGpcr<int_cheri_cap_build, CBuildCap, CLenVT>;
+def : PatGpcrGpcr<int_cheri_cap_type_copy, CCopyType, CLenVT>;
+def : PatGpcrGpcr<int_cheri_cap_conditional_seal, CCSeal, CLenVT>;
+def : PatGpcr<int_cheri_cap_seal_entry, CSealEntry, CLenVT>;
 
 // TODO: Make this rematerialisable like MIPS
 def : PatGpcrGpr<int_cheri_bounded_stack_cap, CSetBounds>;
@@ -1235,16 +1235,16 @@ def : Pat<(CapFrameAddrRegImm GPCR:$rs1, simm12:$imm12),
 // code for ISAv9, so we don't need replacement patterns here.
 // TODO: these intrinsics should probably be removed at some point.
 let Predicates = [HasCheri, NotCheriISAv9] in {
-def : Pat<(int_cheri_cap_to_pointer GPCR:$rs1, GPCRC0IsDDC:$rs2),
+def : Pat<(XLenVT (int_cheri_cap_to_pointer GPCR:$rs1, GPCRC0IsDDC:$rs2)),
           (CToPtr GPCR:$rs1, GPCRC0IsDDC:$rs2)>;
-def : Pat<(int_cheri_cap_to_pointer (int_cheri_ddc_get), GPCR:$rs1),
+def : Pat<(XLenVT (int_cheri_cap_to_pointer (int_cheri_ddc_get), GPCR:$rs1)),
           (CToPtr $rs1, DDC)>;
-def : Pat<(int_cheri_cap_from_pointer GPCRC0IsDDC:$rs1, GPR:$rs2),
+def : Pat<(int_cheri_cap_from_pointer GPCRC0IsDDC:$rs1, (XLenVT GPR:$rs2)),
           (CFromPtr GPCRC0IsDDC:$rs1, GPR:$rs2)>;
-def : Pat<(int_cheri_cap_from_pointer (int_cheri_ddc_get), GPR:$rs2),
+def : Pat<(int_cheri_cap_from_pointer (int_cheri_ddc_get), (XLenVT GPR:$rs2)),
           (CFromPtr DDC, $rs2)>;
 }  // let Predicates = [HasCheri, NotCheriISAv9]
-def : Pat<(int_cheri_cap_diff GPCR:$cs1, GPCR:$cs2),
+def : Pat<(XLenVT (int_cheri_cap_diff GPCR:$cs1, GPCR:$cs2)),
           (SUB (EXTRACT_SUBREG GPCR:$cs1, sub_cap_addr),
                (EXTRACT_SUBREG GPCR:$cs2, sub_cap_addr))>;
 
@@ -1272,24 +1272,24 @@ def : Pat<(ptrtoint (CLenVT (inttoptr (XLenVT 0)))),
 // * Break untagged < tagged semantics
 // * Can't implement exact equality
 class CheriSetCCPatGpcrGpcr<PatFrag CondOp, dag GprGprDag>
-    : Pat<(CondOp GPCR:$cs1, GPCR:$cs2),
+    : Pat<(XLenVT (CondOp GPCR:$cs1, GPCR:$cs2)),
           (OutPatFrag<(ops node:$rs1, node:$rs2), GprGprDag>
             (EXTRACT_SUBREG GPCR:$cs1, sub_cap_addr),
             (EXTRACT_SUBREG GPCR:$cs2, sub_cap_addr))>;
 
 multiclass CheriSetCCPatGpcrImm<PatFrag CondOp, Operand ImmTy, dag GprImmDag> {
-  def : Pat<(CondOp GPCR:$cs1, (inttoptr ImmTy:$imm12)),
+  def : Pat<(XLenVT (CondOp GPCR:$cs1, (inttoptr ImmTy:$imm12))),
             (OutPatFrag<(ops node:$rs1, node:$imm12), GprImmDag>
               (EXTRACT_SUBREG GPCR:$cs1, sub_cap_addr), ImmTy:$imm12)>;
-  def : Pat<(CondOp GPCR:$cs1, (cptradd (inttoptr (XLenVT 0)), ImmTy:$imm12)),
+  def : Pat<(XLenVT (CondOp GPCR:$cs1, (cptradd (inttoptr (XLenVT 0)), ImmTy:$imm12))),
             (OutPatFrag<(ops node:$rs1, node:$imm12), GprImmDag>
               (EXTRACT_SUBREG GPCR:$cs1, sub_cap_addr), ImmTy:$imm12)>;
-  def : Pat<(CondOp GPCR:$cs1,
-              (int_cheri_cap_offset_set (inttoptr (XLenVT 0)), ImmTy:$imm12)),
+  def : Pat<(XLenVT (CondOp GPCR:$cs1,
+              (int_cheri_cap_offset_set (inttoptr (XLenVT 0)), ImmTy:$imm12))),
             (OutPatFrag<(ops node:$rs1, node:$imm12), GprImmDag>
               (EXTRACT_SUBREG GPCR:$cs1, sub_cap_addr), ImmTy:$imm12)>;
-  def : Pat<(CondOp GPCR:$cs1,
-              (int_cheri_cap_address_set (inttoptr (XLenVT 0)), ImmTy:$imm12)),
+  def : Pat<(XLenVT (CondOp GPCR:$cs1,
+              (int_cheri_cap_address_set (inttoptr (XLenVT 0)), ImmTy:$imm12))),
             (OutPatFrag<(ops node:$rs1, node:$imm12), GprImmDag>
               (EXTRACT_SUBREG GPCR:$cs1, sub_cap_addr), ImmTy:$imm12)>;
 }
@@ -1301,7 +1301,7 @@ multiclass CheriSetCCPatGpcrSimm12Plus1<PatFrag CondOp, dag GprImmDag>
     : CheriSetCCPatGpcrImm<CondOp, simm12_plus1, GprImmDag>;
 
 class CheriSetCCPatGpcrNull<PatFrag CondOp, dag GprDag>
-    : Pat<(CondOp GPCR:$cs1, (inttoptr (XLenVT 0))),
+    : Pat<(XLenVT (CondOp GPCR:$cs1, (inttoptr (XLenVT 0)))),
           (OutPatFrag<(ops node:$rs1), GprDag>
             (EXTRACT_SUBREG GPCR:$cs1, sub_cap_addr))>;
 
@@ -1373,8 +1373,8 @@ def : CheriBccSwapPat<setule, BGEU>;
 
 /// Assertion Instructions
 
-def : PatGpcrGpcr<riscv_cap_subset_test, CTestSubset>;
-def : PatGpcrGpcr<riscv_cap_equal_exact, CSEQX>;
+def : PatGpcrGpcr<riscv_cap_subset_test, CTestSubset, XLenVT>;
+def : PatGpcrGpcr<riscv_cap_equal_exact, CSEQX, XLenVT>;
 
 /// Special Capability Register Access Instructions
 
@@ -1397,7 +1397,7 @@ def : PatGpr<int_cheri_representable_alignment_mask, CRAM>;
 
 /// Tag-Memory Access Instructions
 
-def : PatGpcr<int_cheri_cap_load_tags, CLoadTags>;
+def : PatGpcr<int_cheri_cap_load_tags, CLoadTags, XLenVT>;
 
 /// Memory-Access with Explicit Address Type Instructions
 
@@ -1663,16 +1663,16 @@ class PseudoCheriAMO<RegisterClass ValTy=GPR>
 }
 
 multiclass PseudoCheriAMOPat<string AtomicOp, Instruction BaseInst,
-                             RegisterClass ValTy=GPR> {
-  def : Pat<(!cast<PatFrag>(AtomicOp#"_monotonic") GPCR:$addr, ValTy:$incr),
+                             RegisterClass ValTy=GPR, ValueType vt=XLenVT> {
+  def : Pat<(!cast<PatFrag>(AtomicOp#"_monotonic") GPCR:$addr, (vt ValTy:$incr)),
             (BaseInst GPCR:$addr, ValTy:$incr, 2)>;
-  def : Pat<(!cast<PatFrag>(AtomicOp#"_acquire") GPCR:$addr, ValTy:$incr),
+  def : Pat<(!cast<PatFrag>(AtomicOp#"_acquire") GPCR:$addr, (vt ValTy:$incr)),
             (BaseInst GPCR:$addr, ValTy:$incr, 4)>;
-  def : Pat<(!cast<PatFrag>(AtomicOp#"_release") GPCR:$addr, ValTy:$incr),
+  def : Pat<(!cast<PatFrag>(AtomicOp#"_release") GPCR:$addr, (vt ValTy:$incr)),
             (BaseInst GPCR:$addr, ValTy:$incr, 5)>;
-  def : Pat<(!cast<PatFrag>(AtomicOp#"_acq_rel") GPCR:$addr, ValTy:$incr),
+  def : Pat<(!cast<PatFrag>(AtomicOp#"_acq_rel") GPCR:$addr, (vt ValTy:$incr)),
             (BaseInst GPCR:$addr, ValTy:$incr, 6)>;
-  def : Pat<(!cast<PatFrag>(AtomicOp#"_seq_cst") GPCR:$addr, ValTy:$incr),
+  def : Pat<(!cast<PatFrag>(AtomicOp#"_seq_cst") GPCR:$addr, (vt ValTy:$incr)),
             (BaseInst GPCR:$addr, ValTy:$incr, 7)>;
 }
 
@@ -1686,30 +1686,30 @@ class PseudoCheriCmpXchg<RegisterClass ValTy=GPR>
 }
 
 multiclass PseudoCheriCmpXchgPat<string Op, Pseudo CmpXchgInst,
-                                 RegisterClass ValTy=GPR> {
-  def : Pat<(!cast<PatFrag>(Op#"_monotonic") GPCR:$addr, ValTy:$cmp, ValTy:$new),
+                                 RegisterClass ValTy=GPR, ValueType vt=XLenVT> {
+  def : Pat<(!cast<PatFrag>(Op#"_monotonic") GPCR:$addr, (vt ValTy:$cmp), (vt ValTy:$new)),
             (CmpXchgInst GPCR:$addr, ValTy:$cmp, ValTy:$new, 2)>;
-  def : Pat<(!cast<PatFrag>(Op#"_acquire") GPCR:$addr, ValTy:$cmp, ValTy:$new),
+  def : Pat<(!cast<PatFrag>(Op#"_acquire") GPCR:$addr, (vt ValTy:$cmp), (vt ValTy:$new)),
             (CmpXchgInst GPCR:$addr, ValTy:$cmp, ValTy:$new, 4)>;
-  def : Pat<(!cast<PatFrag>(Op#"_release") GPCR:$addr, ValTy:$cmp, ValTy:$new),
+  def : Pat<(!cast<PatFrag>(Op#"_release") GPCR:$addr, (vt ValTy:$cmp), (vt ValTy:$new)),
             (CmpXchgInst GPCR:$addr, ValTy:$cmp, ValTy:$new, 5)>;
-  def : Pat<(!cast<PatFrag>(Op#"_acq_rel") GPCR:$addr, ValTy:$cmp, ValTy:$new),
+  def : Pat<(!cast<PatFrag>(Op#"_acq_rel") GPCR:$addr, (vt ValTy:$cmp), (vt ValTy:$new)),
             (CmpXchgInst GPCR:$addr, ValTy:$cmp, ValTy:$new, 6)>;
-  def : Pat<(!cast<PatFrag>(Op#"_seq_cst") GPCR:$addr, ValTy:$cmp, ValTy:$new),
+  def : Pat<(!cast<PatFrag>(Op#"_seq_cst") GPCR:$addr, (vt ValTy:$cmp), (vt ValTy:$new)),
             (CmpXchgInst GPCR:$addr, ValTy:$cmp, ValTy:$new, 7)>;
 }
 
 multiclass CheriAMOCapPat<string CLenStr, string AtomicOp, string BaseInst> {
   def : PatGpcrGpcr<!cast<PatFrag>(AtomicOp#"_monotonic"),
-                    !cast<RVInst>(BaseInst#"_"#CLenStr)>;
+                    !cast<RVInst>(BaseInst#"_"#CLenStr), CLenVT>;
   def : PatGpcrGpcr<!cast<PatFrag>(AtomicOp#"_acquire"),
-                    !cast<RVInst>(BaseInst#"_AQ_"#CLenStr)>;
+                    !cast<RVInst>(BaseInst#"_AQ_"#CLenStr), CLenVT>;
   def : PatGpcrGpcr<!cast<PatFrag>(AtomicOp#"_release"),
-                    !cast<RVInst>(BaseInst#"_RL_"#CLenStr)>;
+                    !cast<RVInst>(BaseInst#"_RL_"#CLenStr), CLenVT>;
   def : PatGpcrGpcr<!cast<PatFrag>(AtomicOp#"_acq_rel"),
-                    !cast<RVInst>(BaseInst#"_AQ_RL_"#CLenStr)>;
+                    !cast<RVInst>(BaseInst#"_AQ_RL_"#CLenStr), CLenVT>;
   def : PatGpcrGpcr<!cast<PatFrag>(AtomicOp#"_seq_cst"),
-                    !cast<RVInst>(BaseInst#"_AQ_RL_"#CLenStr)>;
+                    !cast<RVInst>(BaseInst#"_AQ_RL_"#CLenStr), CLenVT>;
 }
 
 let Predicates = [HasCheri, HasStdExtA] in {
@@ -1934,16 +1934,16 @@ defm : PseudoCheriAMOPat<"atomic_load_nand_16", PseudoCheriAtomicLoadNand16>;
 
 defm : PseudoCheriAMOPat<"atomic_load_nand_32", PseudoCheriAtomicLoadNand32>;
 
-defm : PseudoCheriAMOPat<"atomic_load_add_cap", PseudoCheriAtomicLoadAddCap, GPCR>;
-defm : PseudoCheriAMOPat<"atomic_load_sub_cap", PseudoCheriAtomicLoadSubCap, GPCR>;
-defm : PseudoCheriAMOPat<"atomic_load_and_cap", PseudoCheriAtomicLoadAndCap, GPCR>;
-defm : PseudoCheriAMOPat<"atomic_load_or_cap", PseudoCheriAtomicLoadOrCap, GPCR>;
-defm : PseudoCheriAMOPat<"atomic_load_xor_cap", PseudoCheriAtomicLoadXorCap, GPCR>;
-defm : PseudoCheriAMOPat<"atomic_load_max_cap", PseudoCheriAtomicLoadMaxCap, GPCR>;
-defm : PseudoCheriAMOPat<"atomic_load_min_cap", PseudoCheriAtomicLoadMinCap, GPCR>;
-defm : PseudoCheriAMOPat<"atomic_load_umax_cap", PseudoCheriAtomicLoadUMaxCap, GPCR>;
-defm : PseudoCheriAMOPat<"atomic_load_umin_cap", PseudoCheriAtomicLoadUMinCap, GPCR>;
-defm : PseudoCheriAMOPat<"atomic_load_nand_cap", PseudoCheriAtomicLoadNandCap, GPCR>;
+defm : PseudoCheriAMOPat<"atomic_load_add_cap", PseudoCheriAtomicLoadAddCap, GPCR, CLenVT>;
+defm : PseudoCheriAMOPat<"atomic_load_sub_cap", PseudoCheriAtomicLoadSubCap, GPCR, CLenVT>;
+defm : PseudoCheriAMOPat<"atomic_load_and_cap", PseudoCheriAtomicLoadAndCap, GPCR, CLenVT>;
+defm : PseudoCheriAMOPat<"atomic_load_or_cap", PseudoCheriAtomicLoadOrCap, GPCR, CLenVT>;
+defm : PseudoCheriAMOPat<"atomic_load_xor_cap", PseudoCheriAtomicLoadXorCap, GPCR, CLenVT>;
+defm : PseudoCheriAMOPat<"atomic_load_max_cap", PseudoCheriAtomicLoadMaxCap, GPCR, CLenVT>;
+defm : PseudoCheriAMOPat<"atomic_load_min_cap", PseudoCheriAtomicLoadMinCap, GPCR, CLenVT>;
+defm : PseudoCheriAMOPat<"atomic_load_umax_cap", PseudoCheriAtomicLoadUMaxCap, GPCR, CLenVT>;
+defm : PseudoCheriAMOPat<"atomic_load_umin_cap", PseudoCheriAtomicLoadUMinCap, GPCR, CLenVT>;
+defm : PseudoCheriAMOPat<"atomic_load_nand_cap", PseudoCheriAtomicLoadNandCap, GPCR, CLenVT>;
 
 /// Compare and exchange
 
@@ -1951,7 +1951,7 @@ defm : PseudoCheriCmpXchgPat<"atomic_cmp_swap_8", PseudoCheriCmpXchg8>;
 defm : PseudoCheriCmpXchgPat<"atomic_cmp_swap_16", PseudoCheriCmpXchg16>;
 defm : PseudoCheriCmpXchgPat<"atomic_cmp_swap_32", PseudoCheriCmpXchg32>;
 
-defm : PseudoCheriCmpXchgPat<"atomic_cmp_swap_cap", PseudoCheriCmpXchgCap, GPCR>;
+defm : PseudoCheriCmpXchgPat<"atomic_cmp_swap_cap", PseudoCheriCmpXchgCap, GPCR, CLenVT>;
 
 } // Predicates = [HasCheri, HasStdExtA, IsCapMode]
 
