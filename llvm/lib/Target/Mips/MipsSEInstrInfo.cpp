@@ -211,7 +211,7 @@ static bool isORCopyInst(const MachineInstr &MI) {
 }
 
 static bool isCIncOffsetCopyInst(const MachineInstr &MI) {
-  if (MI.getOpcode() == Mips::CIncOffset &&
+  if (MI.getOpcode() == Mips::CIncOffset && MI.getOperand(1).isReg() &&
       MI.getOperand(2).getReg() == Mips::ZERO_64)
     return true;
   if (MI.getOpcode() == Mips::CIncOffsetImm && MI.getOperand(2).getImm() == 0)
