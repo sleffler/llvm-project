@@ -1,5 +1,5 @@
-; RUN: llc -opaque-pointers=0 < %s -disable-block-placement | FileCheck %s
-; RUN: llc -opaque-pointers=0 < %s -disable-block-placement -disable-sparc-leaf-proc=0 | FileCheck %s
+; RUN: llc < %s -disable-block-placement | FileCheck %s
+; RUN: llc < %s -disable-block-placement -disable-sparc-leaf-proc=0 | FileCheck %s
 target datalayout = "E-p:64:64:64-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-v64:64:64-n32:64-S128"
 target triple = "sparcv9-sun-solaris"
 
@@ -18,7 +18,7 @@ define double @varargsfunc(i8* nocapture %fmt, double %sum, ...) {
 entry:
   %ap = alloca i8*, align 4
   %ap1 = bitcast i8** %ap to i8*
-  call void @llvm.va_start.p0i8(i8* %ap1)
+  call void @llvm.va_start.p0(i8* %ap1)
   br label %for.cond
 
 for.cond:
@@ -60,7 +60,7 @@ sw.default:
   ret double %sum.addr.0
 }
 
-declare void @llvm.va_start.p0i8(i8*)
+declare void @llvm.va_start.p0(i8*)
 
 @.str = private unnamed_addr constant [4 x i8] c"abc\00", align 1
 
