@@ -2148,7 +2148,11 @@ bool RISCVDAGToDAGISel::SelectInlineAsmMemoryOperand(
   case InlineAsm::Constraint_o:
   case InlineAsm::Constraint_m: {
     SDValue Op0, Op1;
-    bool Found = SelectAddrRegImm(Op, Op0, Op1);
+    bool Found;
+    if (Op.getValueType().isFatPointer())
+      Found = SelectCapRegImm(Op, Op0, Op1);
+    else
+      Found = SelectAddrRegImm(Op, Op0, Op1);
     assert(Found && "SelectAddrRegImm should always succeed");
     (void)Found;
     OutOps.push_back(Op0);
