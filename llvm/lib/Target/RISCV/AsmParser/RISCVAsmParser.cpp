@@ -3061,33 +3061,27 @@ bool RISCVAsmParser::parseDirectiveOption() {
   }
 
   if (Option == "capmode") {
-    if (!getSTI().getFeatureBits()[RISCV::FeatureCheri])
+    if (Parser.parseEOL())
+      return true;
+
+    if (!getSTI().hasFeature(RISCV::FeatureCheri))
       return Error(Parser.getTok().getLoc(),
                    "option requires 'xcheri' extension");
 
     getTargetStreamer().emitDirectiveOptionCapMode();
-
-    Parser.Lex();
-    if (Parser.getTok().isNot(AsmToken::EndOfStatement))
-      return Error(Parser.getTok().getLoc(),
-                   "unexpected token, expected end of statement");
-
     setFeatureBits(RISCV::FeatureCapMode, "cap-mode");
     return false;
   }
 
   if (Option == "nocapmode") {
-    if (!getSTI().getFeatureBits()[RISCV::FeatureCheri])
+    if (Parser.parseEOL())
+      return true;
+
+    if (!getSTI().hasFeature(RISCV::FeatureCheri))
       return Error(Parser.getTok().getLoc(),
                    "option requires 'xcheri' extension");
 
     getTargetStreamer().emitDirectiveOptionNoCapMode();
-
-    Parser.Lex();
-    if (Parser.getTok().isNot(AsmToken::EndOfStatement))
-      return Error(Parser.getTok().getLoc(),
-                   "unexpected token, expected end of statement");
-
     clearFeatureBits(RISCV::FeatureCapMode, "cap-mode");
     return false;
   }
