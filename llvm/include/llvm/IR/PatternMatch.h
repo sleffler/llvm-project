@@ -1604,11 +1604,15 @@ template <typename Op_t> struct PtrToIntSameSize_match {
       : DL(DL), Op(OpMatch) {}
 
   template <typename OpTy> bool match(OpTy *V) {
-    if (auto *O = dyn_cast<Operator>(V))
+    if (auto *O = dyn_cast<Operator>(V)) {
+      if (O->getOpcode() == Instruction::PtrToInt &&
+          DL.isFatPointer(O->getOperand(0)->getType()))
+        return true;
       return O->getOpcode() == Instruction::PtrToInt &&
              DL.getTypeSizeInBits(O->getType()) ==
                  DL.getTypeSizeInBits(O->getOperand(0)->getType()) &&
              Op.match(O->getOperand(0));
+    }
     return false;
   }
 };
