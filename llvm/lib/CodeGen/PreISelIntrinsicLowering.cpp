@@ -193,6 +193,11 @@ bool PreISelIntrinsicLowering::expandMemIntrinsicUses(Function &F) const {
   Intrinsic::ID ID = F.getIntrinsicID();
   bool Changed = false;
 
+  // Disable this for CHERI-RISCV
+  auto Target = Triple(F.getParent()->getTargetTriple());
+  if (Target.isRISCV())
+    return false;
+
   for (User *U : llvm::make_early_inc_range(F.users())) {
     Instruction *Inst = cast<Instruction>(U);
 
