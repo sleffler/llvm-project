@@ -192,7 +192,6 @@ bool RISCVAsmBackend::fixupNeedsRelaxationAdvanced(const MCFixup &Fixup,
 void RISCVAsmBackend::relaxInstruction(MCInst &Inst,
                                        const MCSubtargetInfo &STI) const {
   MCInst Res;
-  bool IsCapMode = STI.getFeatureBits()[RISCV::FeatureCapMode];
 
   switch (Inst.getOpcode()) {
   default:
