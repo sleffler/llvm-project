@@ -10,6 +10,10 @@
 #define _LIBCPP___ATOMIC_IS_ALWAYS_LOCK_FREE_H
 
 #include <__config>
+#ifdef __CHERI_PURE_CAPABILITY__
+#include <__atomic/atomic_lock_free.h>
+#include <typeinfo>
+#endif
 
 #if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
 #  pragma GCC system_header
