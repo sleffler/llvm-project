@@ -672,7 +672,8 @@ MCSymbol *AsmPrinter::getSymbol(const GlobalValue *GV) const {
   return TM.getSymbol(GV);
 }
 
-MCSymbol *AsmPrinter::getSymbolPreferLocal(const GlobalValue &GV) const {
+MCSymbol *AsmPrinter::getSymbolPreferLocal(const GlobalValue &GV,
+                                           bool Force) const {
   // On ELF, use .Lfoo$local if GV is a non-interposable GlobalObject with an
   // exact definion (intersection of GlobalValue::hasExactDefinition() and
   // !isInterposable()). These linkages include: external, appending, internal,
@@ -680,7 +681,10 @@ MCSymbol *AsmPrinter::getSymbolPreferLocal(const GlobalValue &GV) const {
   // assembler would otherwise be conservative and assume a global default
   // visibility symbol can be interposable, even if the code generator already
   // assumed it.
-  if (TM.getTargetTriple().isOSBinFormatELF() && GV.canBenefitFromLocalAlias()) {
+  if (Force)
+    return getSymbolWithGlobalValueBase(&GV, "$local");
+  if (TM.getTargetTriple().isOSBinFormatELF() &&
+      GV.canBenefitFromLocalAlias()) {
     const Module &M = *GV.getParent();
     if (TM.getRelocationModel() != Reloc::Static &&
         M.getPIELevel() == PIELevel::Default && GV.isDSOLocal())
@@ -954,9 +958,6 @@ void AsmPrinter::emitFunctionHeader() {
 
   if (MAI->hasDotTypeDotSizeDirective()) {
     OutStreamer->emitSymbolAttribute(CurrentFnSym, MCSA_ELF_TypeFunction);
-    if (CurrentFnBeginForEH)
-      OutStreamer->emitSymbolAttribute(CurrentFnBeginForEH,
-                                       MCSA_ELF_TypeFunction);
   }
 
   if (F.hasFnAttribute(Attribute::Cold))
@@ -1047,14 +1048,9 @@ void AsmPrinter::emitFunctionHeader() {
     if (MAI->useAssignmentForEHBegin()) {
       MCSymbol *CurPos = OutContext.createTempSymbol();
       OutStreamer->emitLabel(CurPos);
-      if (CurrentFnBeginForEH)
-        OutStreamer->emitAssignment(CurrentFnBeginForEH,
-                                    MCSymbolRefExpr::create(CurPos, OutContext));
       OutStreamer->emitAssignment(CurrentFnBegin,
                                  MCSymbolRefExpr::create(CurPos, OutContext));
     } else {
-      if (CurrentFnBeginForEH)
-        OutStreamer->emitLabel(CurrentFnBeginForEH);
       OutStreamer->emitLabel(CurrentFnBegin);
     }
   }
@@ -1076,6 +1072,8 @@ void AsmPrinter::emitFunctionHeader() {
     emitGlobalConstant(F.getParent()->getDataLayout(), F.getPrologueData(), 0);
 }
 
+static bool needFuncLabelsForEH(const MachineFunction &MF);
+
 /// EmitFunctionEntryLabel - Emit the label that is the entrypoint for the
 /// function.  This can be overridden by targets as required to do custom stuff.
 void AsmPrinter::emitFunctionEntryLabel() {
@@ -1090,7 +1088,10 @@ void AsmPrinter::emitFunctionEntryLabel() {
   OutStreamer->emitLabel(CurrentFnSym);
 
   if (TM.getTargetTriple().isOSBinFormatELF()) {
-    MCSymbol *Sym = getSymbolPreferLocal(MF->getFunction());
+    // For CHERI purecap exception handling, we always have to use a local
+    // alias even if the function is not dso_local.
+    bool ForceLocal = MAI->isCheriPurecapABI() && needFuncLabelsForEH(*MF);
+    MCSymbol *Sym = getSymbolPreferLocal(MF->getFunction(), ForceLocal);
     if (Sym != CurrentFnSym) {
       cast<MCSymbolELF>(Sym)->setType(ELF::STT_FUNC);
       CurrentFnBeginLocal = Sym;
@@ -1903,8 +1904,6 @@ void AsmPrinter::emitFunctionBody() {
         MCSymbolRefExpr::create(CurrentFnEnd, OutContext),
         MCSymbolRefExpr::create(CurrentFnSymForSize, OutContext), OutContext);
     OutStreamer->emitELFSize(CurrentFnSym, SizeExp);
-    if (CurrentFnBeginForEH)
-      OutStreamer->emitELFSize(CurrentFnBeginForEH, SizeExp);
     if (CurrentFnBeginLocal)
       OutStreamer->emitELFSize(CurrentFnBeginLocal, SizeExp);
   }
@@ -2504,7 +2503,6 @@ void AsmPrinter::SetupMachineFunction(MachineFunction &MF) {
 
   CurrentFnSymForSize = CurrentFnSym;
   CurrentFnBegin = nullptr;
-  CurrentFnBeginForEH = nullptr;
   CurrentFnBeginLocal = nullptr;
   CurrentSectionBeginSym = nullptr;
   MBBSectionRanges.clear();
@@ -2518,14 +2516,6 @@ void AsmPrinter::SetupMachineFunction(MachineFunction &MF) {
     CurrentFnBegin = createTempSymbol("func_begin");
     if (NeedsLocalForSize)
       CurrentFnSymForSize = CurrentFnBegin;
-    // In the pure-capability ABI we have to create dynamic relocations for the
-    // landing pads. To avoid creating an (unnecessary and incorrect) dynamic
-    // relocation with a non-zero addend, we need to ensure that the target
-    // symbol is non-preemptible by creating a local alias for the function.
-    // See https://github.com/CTSRD-CHERI/llvm-project/issues/512.
-    // TODO: could probably omit this for !F.isInterposable()?
-    if (MAI->isCheriPurecapABI() && needFuncLabelsForEH(MF))
-      CurrentFnBeginForEH = getSymbolWithGlobalValueBase(&F, "$eh_alias");
   }
 
   ORE = &getAnalysis<MachineOptimizationRemarkEmitterPass>().getORE();
