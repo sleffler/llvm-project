@@ -1186,8 +1186,10 @@ def : MnemonicAlias<"c.fsdsp", "c.cfsdcsp">;
 //===----------------------------------------------------------------------===//
 
 let Predicates = [HasCheri, IsCapMode] in {
+// PCC-relative CLLC is two instructions, but GCP-relative needs 3, so the
+// maximum expanded size of this Pseudo is 12 bytes.
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0, isCodeGenOnly = 0,
-    isAsmParserOnly = 1, Size = 8 in
+    isAsmParserOnly = 1, Size = 12 in
 def PseudoCLLC : Pseudo<(outs GPCR:$dst), (ins bare_symbol:$src), [],
                         "cllc", "$dst, $src">;
 
@@ -1871,8 +1873,9 @@ def PseudoCCALL : Pseudo<(outs), (ins cap_call_symbol:$func), []> {
   let AsmString = "ccall\t$func";
 }
 
+// PseudoCompartmentCall Expands to AUIPCC, CLC_64, C_CJALR (10 bytes).
 let Predicates = [HasCheri, IsCapMode],
-    isCall = 1, Defs = [C1], isCodeGenOnly = 1 in
+    isCall = 1, Defs = [C1], isCodeGenOnly = 1, Size = 10 in
 def PseudoCompartmentCall : Pseudo<(outs), (ins cap_call_symbol:$func), []>;
 
 let Predicates = [HasCheri, IsCapMode, IsPureCapABI] in {
