@@ -16339,7 +16339,7 @@ SDValue RISCVTargetLowering::LowerCall(CallLoweringInfo &CLI,
       auto *GV = F->getParent()->getGlobalVariable(ImportName);
       auto ImportPtr = DAG.getGlobalAddress(GV, DL, PtrVT, 0, 0);
       auto Import = DAG.getLoad(PtrVT, DL, Chain, ImportPtr,
-                                MachinePointerInfo(200, 0), 8 /*alignment*/);
+                                MachinePointerInfo(200, 0), Align(8));
       RegsToPass.emplace_back(RISCV::C6, Import);
     }
   }
