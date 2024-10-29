@@ -604,7 +604,7 @@ constexpr const char *saveTempsValues[] = {
     "resolution", "preopt",     "promote", "internalize",  "import",
     "opt",        "precodegen", "prelink", "combinedindex"};
 
-template <class ELFT> void LinkerDriver::linkerMain(ArrayRef<const char *> argsArr) {
+void LinkerDriver::linkerMain(ArrayRef<const char *> argsArr) {
   ELFOptTable parser;
   opt::InputArgList args = parser.parse(argsArr.slice(1));
 
@@ -684,7 +684,23 @@ template <class ELFT> void LinkerDriver::linkerMain(ArrayRef<const char *> argsA
     if (errorCount())
       return;
 
-    link(args);
+    // XXX temp hack; to be removed when compartment reports are redone
+    switch (config->ekind) {
+    case ELF32LEKind:
+      link<ELF32LE>(args);
+      break;
+    case ELF32BEKind:
+      link<ELF32BE>(args);
+      break;
+    case ELF64LEKind:
+      link<ELF64LE>(args);
+      break;
+    case ELF64BEKind:
+      link<ELF64BE>(args);
+      break;
+    default:
+      llvm_unreachable("unknown Config->EKind");
+    }
   }
 
   if (config->timeTraceEnabled) {
@@ -2849,6 +2865,7 @@ static void dump_json_compartments() {
 
 // Do actual linking. Note that when this function is called,
 // all linker scripts have already been parsed.
+template <class ELFT>
 void LinkerDriver::link(opt::InputArgList &args) {
   llvm::TimeTraceScope timeScope("Link", StringRef("LinkerDriver::Link"));
 
