@@ -11,8 +11,8 @@ entry:
 ; CHECK: auipcc  ca0, %cheri_compartment_pccrel_hi(__library_import_libcalls_add)
 ; CHECK: cincoffset      ca0, ca0, %cheri_compartment_pccrel_lo(.LBB0_1)
 ; CHECK: clc     ca2, 0(ca0)
-; CHECK: addi    a0, zero, 1
-; CHECK: addi    a1, zero, 2
+; CHECK: li    a0, 1
+; CHECK: li    a1, 2
 ; CHECK: cjalr   ca2
   %call = tail call cherilibcallcc i32 @add(i32 1, i32 2) #2
 ; CHECK: auipcc  ca0, %cheri_compartment_pccrel_hi(__library_import_libcalls_foo)

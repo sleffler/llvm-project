@@ -8,8 +8,8 @@ target triple = "riscv32-unknown-unknown"
 define dso_local chericcallcce void @_Z4ret0v() local_unnamed_addr addrspace(200) #0 {
 entry:
   ; CHECK-LABEL: _Z4ret0v
-  ; CHECK: mv    a0, zero
-  ; CHECK: mv    a1, zero
+  ; CHECK: li    a0, 0
+  ; CHECK: li    a1, 0
   ; CHECK: cret
   ret void
 }
@@ -18,8 +18,8 @@ entry:
 define dso_local chericcallcce i32 @_Z4ret1v() local_unnamed_addr addrspace(200) #0 {
 entry:
   ; CHECK-LABEL: _Z4ret1v
-  ; CHECK: addi  a0, zero, 1
-  ; CHECK: mv    a1, zero
+  ; CHECK: li    a0, 1
+  ; CHECK: li    a1, 0
   ; CHECK: cret
   ret i32 1
 }
@@ -28,8 +28,8 @@ entry:
 define dso_local chericcallcce [2 x i32] @_Z4ret2v() local_unnamed_addr addrspace(200) #0 {
 entry:
   ; CHECK-LABEL: _Z4ret2v
-  ; CHECK: addi  a0, zero, 1
-  ; CHECK: addi  a1, zero, 2
+  ; CHECK: li  a0, 1
+  ; CHECK: li  a1, 2
   ; CHECK: cret
   ret [2 x i32] [i32 1, i32 2]
 }
