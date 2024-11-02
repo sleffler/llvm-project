@@ -3616,9 +3616,9 @@ public:
         } else if (sec->name == ".sealed_objects")
           sealedObjects = sec;
 
-      if (Symbol *sym = symtab->find("__shared_objects_start"))
+      if (Symbol *sym = symtab.find("__shared_objects_start"))
         preSharedObjectStart = sym->getVA();
-      if (Symbol *sym = symtab->find("__shared_objects_end"))
+      if (Symbol *sym = symtab.find("__shared_objects_end"))
         preSharedObjectEnd = sym->getVA();
       for (OutputSection *sec : outputSections)
         addOutputSection(sec);
