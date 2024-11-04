@@ -13111,6 +13111,14 @@ static QualType getCommonNonSugarTypeNode(ASTContext &Ctx, const Type *X,
                                             PX->getAddrSpaceExpr(),
                                             getCommonAttrLoc(PX, PY));
   }
+  case Type::DependentPointer: {
+    const auto *PX = cast<DependentPointerType>(X),
+               *PY = cast<DependentPointerType>(Y);
+    assert(PX->getPointerInterpretation() == PY->getPointerInterpretation());
+    return Ctx.getDependentPointerType(getCommonPointeeType(Ctx, PX, PY),
+                                       PX->getPointerInterpretation(),
+                                       getCommonAttrLoc(PX, PY));
+  }
   case Type::FunctionNoProto: {
     const auto *FX = cast<FunctionNoProtoType>(X),
                *FY = cast<FunctionNoProtoType>(Y);

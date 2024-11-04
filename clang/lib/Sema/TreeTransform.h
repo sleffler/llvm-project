@@ -5774,7 +5774,7 @@ QualType TreeTransform<Derived>::TransformDependentPointerType(
   QualType Result = TL.getType();
   if (getDerived().AlwaysRebuild() || PointerType != T->getPointerType()) {
     Result = getDerived().RebuildDependentPointerType(
-        PointerType, T->getPointerInterpretation(), T->getQualifierLoc());
+        PointerType, T->getPointerInterpretation(), T->getAttributeLoc());
     if (Result.isNull())
       return QualType();
   }

@@ -668,13 +668,13 @@ let Class = DependentPointerType in {
   def : Property<"pointerInterpretation", PointerInterpretationKind> {
     let Read = [{ node->getPointerInterpretation() }];
   }
-  def : Property<"qualifierLoc", SourceLocation> {
-    let Read = [{ node->getQualifierLoc() }];
+  def : Property<"attributeloc", SourceLocation> {
+    let Read = [{ node->getAttributeLoc() }];
   }
 
   def : Creator<[{
     return ctx.getDependentPointerType(pointerType, pointerInterpretation,
-                                       qualifierLoc);
+                                       attributeloc);
   }]>;
 }
 
