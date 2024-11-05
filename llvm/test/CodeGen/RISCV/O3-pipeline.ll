@@ -31,8 +31,9 @@
 ; CHECK-NEXT:       RISC-V gather/scatter lowering
 ; CHECK-NEXT:       Interleaved Access Pass
 ; CHECK-NEXT:       RISC-V CodeGenPrepare
-; CHECK-NEXT:    CHERI bound stack allocations
-; CHECK-NEXT:    FunctionPass Manager
+; CHECK-NEXT:       CHERIoT zero sret 
+; CHECK-NEXT:     CHERI bound stack allocations
+; CHECK-NEXT:     FunctionPass Manager
 ; CHECK-NEXT:       Module Verifier
 ; CHECK-NEXT:       Dominator Tree Construction
 ; CHECK-NEXT:       Basic Alias Analysis (stateless AA impl)
