@@ -8,9 +8,9 @@ target triple = "riscv32-unknown-unknown"
 define dso_local nonnull i32 () addrspace(200)* @num() local_unnamed_addr addrspace(200) align 8192 #0 {
 entry:
 ; compartment_pccrel_hi relocation (2 * 4096) applied to auipcc
-; CHECK: 0: 17 45 00 00   auipcc  ca0, 4
+; CHECK: 0: 17 05 00 00   auipcc  ca0, 0
 ; compartment_pccrel_lo relocation (8) applied to cincoffset
-; CHECK: 4: 5b 15 85 00   cincoffset      ca0, ca0, 8
+; CHECK: 4: 5b 15 05 00   cincoffset      ca0, ca0, 0
   ret i32 () addrspace(200)* @ft
 }
 
@@ -28,7 +28,7 @@ entry:
   ret i32 42
 }
 
-attributes #0 = { minsize mustprogress nofree norecurse nosync nounwind optsize readnone willreturn "frame-pointer"="none" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="cheriot" "target-features"="+xcheri,-64bit,-relax,-save-restore" }
+attributes #0 = { minsize mustprogress nofree norecurse nosync nounwind optsize readnone willreturn "frame-pointer"="none" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="cheriot" "target-features"="+xcheri,+xcheri-norvc,-64bit,-relax,-save-restore" }
 
 !llvm.module.flags = !{!0, !1, !2, !3}
 !llvm.ident = !{!4}
