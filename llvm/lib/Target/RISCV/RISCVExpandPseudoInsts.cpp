@@ -579,7 +579,9 @@ bool RISCVExpandPseudo::expandCapLoadLocalCap(
                                   InBounds);
     }
   }
-  return expandAuipccInstPair(MBB, MBBI, NextMBBI, RISCVII::MO_PCREL_HI, RISCV::CIncOffsetImm);
+  return expandAuipccInstPair(MBB, MBBI, NextMBBI,
+                              RISCVII::MO_CHERIOT_COMPARTMENT_HI,
+                              RISCV::CIncOffsetImm);
 }
 
 bool RISCVExpandPseudo::expandCapLoadGlobalCap(
