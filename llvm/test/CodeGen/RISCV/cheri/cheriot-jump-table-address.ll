@@ -18,7 +18,7 @@ define [2 x i32] @foo(i32 %searched) addrspace(200) {
 ; CHECK-NEXT:    slli a0, a0, 2
 ; CHECK-NEXT:  .LBB0_3: # %entry
 ; CHECK-NEXT:    # Label of block must be emitted
-; CHECK-NEXT:    auipcc ca1, %pcrel_hi(.LJTI0_0)
+; CHECK-NEXT:    auipcc ca1, %cheriot_compartment_hi(.LJTI0_0)
 ; CHECK-NEXT:    cincoffset ca1, ca1, %cheriot_compartment_lo_i(.LBB0_3)
 ; CHECK-NEXT:    cincoffset ca0, ca1, a0
 ; CHECK-NEXT:    clw a0, 0(ca0)
