@@ -3533,7 +3533,7 @@ class DependentPointerType : public Type,
 
 public:
   QualType getPointerType() const { return PointerType; }
-  SourceLocation getQualifierLoc() const { return Loc; }
+  SourceLocation getAttributeLoc() const { return Loc; }
 
   bool isSugared() const { return false; }
   QualType desugar() const { return QualType(this, 0); }
